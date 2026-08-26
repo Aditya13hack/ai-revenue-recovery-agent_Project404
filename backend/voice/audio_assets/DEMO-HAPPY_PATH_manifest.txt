@@ -1,0 +1,7 @@
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_00_agent.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_01_customer.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_02_agent.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_03_customer.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_04_agent.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_05_customer.mp3
+D:\Project404\backend\voice\audio_assets\DEMO-HAPPY_PATH_turn_06_agent.mp3
