@@ -17,6 +17,9 @@ edge-tts>=7.0.0
 # HTTP Client
 httpx>=0.27.0
 
+# Razorpay Payment Gateway
+razorpay>=1.4.0
+
 # Data Generation
 faker>=30.0.0
 

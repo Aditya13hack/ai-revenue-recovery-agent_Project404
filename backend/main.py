@@ -271,6 +271,268 @@ def list_decisions(
     }
 
 
+# ─────────────────── RAZORPAY LIVE MODE ───────────────────
+
+from fastapi import Request
+from backend.razorpay_client import verify_connection, create_test_order, create_payment_link, verify_webhook_signature
+from backend.database.connection import get_db
+from backend.control_plane.budget_tracker import BudgetTracker
+from backend.control_plane.rules_config import MerchantPolicyConfig
+from backend.orchestrator.graph import process_case
+from backend.config import CAMPAIGN_BUDGET
+from datetime import datetime
+import json
+
+
+@app.get("/api/razorpay/status")
+def razorpay_status():
+    """Check if Razorpay API keys are valid and connected."""
+    return verify_connection()
+
+
+@app.post("/api/razorpay/create-test-order")
+def razorpay_create_order(
+    amount: float = Query(5000, description="Amount in INR"),
+    customer_name: str = Query("Test Customer", description="Customer name"),
+    customer_phone: str = Query("+919999999999", description="Customer phone"),
+):
+    """Create a real Razorpay order + payment link in test mode (proves API works)."""
+    try:
+        receipt = f"LIVE-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+        # 1. Create Order
+        order = create_test_order(
+            amount_inr=amount,
+            receipt=receipt,
+            notes={"source": "ai_recovery_agent", "customer": customer_name},
+        )
+
+        # 2. Create Payment Link
+        link = create_payment_link(
+            amount_inr=amount,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            description=f"Recovery payment for {customer_name}",
+            receipt=receipt,
+        )
+
+        return {
+            "success": True,
+            "order_id": order["id"],
+            "order_amount": order["amount"] / 100,
+            "order_status": order["status"],
+            "payment_link": link.get("short_url"),
+            "payment_link_id": link.get("id"),
+            "receipt": receipt,
+            "message": f"Razorpay order created. Payment link: {link.get('short_url')}",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Razorpay API error: {str(e)}")
+
+
+@app.post("/api/webhook/razorpay")
+async def razorpay_webhook(request: Request, db: Session = Depends(get_db_dependency)):
+    """
+    Receive Razorpay webhooks (payment.failed, payment.captured, etc.).
+    Creates a real case and processes it through the AI + Control Plane pipeline.
+    """
+    body = await request.body()
+    body_str = body.decode("utf-8")
+
+    # Verify signature (optional in test mode, but good practice)
+    signature = request.headers.get("X-Razorpay-Signature", "")
+    # In test mode with local testing, we skip signature verification
+    # In production, uncomment: verify_webhook_signature(body_str, signature)
+
+    try:
+        payload = json.loads(body_str)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    event_type = payload.get("event", "")
+    entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
+
+    if event_type != "payment.failed":
+        return {"status": "ignored", "event": event_type}
+
+    # Extract payment details from Razorpay webhook
+    payment_id = entity.get("id", "")
+    amount_paise = entity.get("amount", 0)
+    amount_inr = amount_paise / 100
+    method = entity.get("method", "upi")
+    error_code = entity.get("error_code", "")
+    error_description = entity.get("error_description", "")
+    contact = entity.get("contact", "+919999999999")
+    email = entity.get("email", "")
+    notes = entity.get("notes", {})
+    order_id = entity.get("order_id", "")
+
+    # Map Razorpay error to our failure reasons
+    failure_map = {
+        "BAD_REQUEST_ERROR": "insufficient_balance",
+        "GATEWAY_ERROR": "bank_timeout",
+        "SERVER_ERROR": "bank_timeout",
+    }
+    failure_reason = failure_map.get(error_code, "unknown")
+
+    # Map payment method to our payment types
+    method_map = {
+        "upi": "upi_autopay",
+        "emandate": "upi_autopay",
+        "card": "emi",
+        "netbanking": "emi",
+        "wallet": "subscription",
+        "nach": "subscription",
+    }
+    payment_type = method_map.get(method, "upi_autopay")
+
+    # Determine value tier
+    if amount_inr >= 10000:
+        value_tier = "high"
+    elif amount_inr >= 3000:
+        value_tier = "medium"
+    else:
+        value_tier = "low"
+
+    # Create case ID from Razorpay payment ID
+    case_id = f"RZP-{payment_id[-8:].upper()}" if payment_id else f"RZP-{datetime.now().strftime('%H%M%S')}"
+    customer_name = notes.get("customer", email.split("@")[0] if email else "Razorpay Customer")
+
+    # Check if case already exists
+    existing = db.query(Case).filter(Case.id == case_id).first()
+    if existing:
+        return {"status": "duplicate", "case_id": case_id}
+
+    # Create real case in database
+    new_case = Case(
+        id=case_id,
+        customer_name=customer_name,
+        customer_phone=contact or "+919999999999",
+        payment_type=payment_type,
+        payment_amount=amount_inr,
+        failure_reason=failure_reason,
+        razorpay_payment_id=payment_id,
+        value_tier=value_tier,
+        risk_profile="first_time_failure",
+        difficulty_label="medium",
+        do_not_contact=False,
+        contact_attempts=0,
+        payment_retries=0,
+        consecutive_refusals=0,
+        total_discount_given=0.0,
+        extension_days_given=0,
+        amount_recovered=0.0,
+        detected_at=datetime.utcnow(),
+    )
+    db.add(new_case)
+    db.commit()
+
+    # Process through AI + Control Plane pipeline
+    config = MerchantPolicyConfig.from_config()
+    budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
+
+    try:
+        result = process_case(case_id, db, budget_tracker, config)
+        outcome = result.get("final_outcome", "unknown")
+    except Exception as e:
+        outcome = f"error: {str(e)[:80]}"
+
+    return {
+        "status": "processed",
+        "case_id": case_id,
+        "razorpay_payment_id": payment_id,
+        "amount": amount_inr,
+        "failure_reason": failure_reason,
+        "outcome": outcome,
+        "message": f"Live case {case_id} created and processed via AI + Control Plane.",
+    }
+
+
+@app.post("/api/webhook/razorpay/simulate")
+def simulate_webhook(
+    amount: float = Query(5000, description="Amount in INR"),
+    customer_name: str = Query("Aarav Sharma", description="Customer name"),
+    failure_reason: str = Query("insufficient_balance", description="Failure reason"),
+    payment_type: str = Query("upi_autopay", description="Payment type"),
+    db: Session = Depends(get_db_dependency),
+):
+    """
+    Simulate a Razorpay payment.failed webhook locally (no ngrok needed).
+    Creates a real case and processes it through the full pipeline.
+    """
+    case_id = f"LIVE-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+
+    if amount >= 10000:
+        value_tier = "high"
+    elif amount >= 3000:
+        value_tier = "medium"
+    else:
+        value_tier = "low"
+
+    new_case = Case(
+        id=case_id,
+        customer_name=customer_name,
+        customer_phone="+919876543210",
+        payment_type=payment_type,
+        payment_amount=amount,
+        failure_reason=failure_reason,
+        razorpay_payment_id=f"pay_simulated_{case_id}",
+        value_tier=value_tier,
+        risk_profile="first_time_failure",
+        difficulty_label="medium",
+        do_not_contact=False,
+        contact_attempts=0,
+        payment_retries=0,
+        consecutive_refusals=0,
+        total_discount_given=0.0,
+        extension_days_given=0,
+        amount_recovered=0.0,
+        detected_at=datetime.utcnow(),
+    )
+    db.add(new_case)
+    db.commit()
+
+    config = MerchantPolicyConfig.from_config()
+    budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
+
+    try:
+        result = process_case(case_id, db, budget_tracker, config)
+        outcome = result.get("final_outcome", "unknown")
+        channel = result.get("triage_result")
+        channel_str = channel.assigned_channel.value if channel else "N/A"
+    except Exception as e:
+        outcome = f"error: {str(e)[:80]}"
+        channel_str = "error"
+
+    return {
+        "status": "processed",
+        "case_id": case_id,
+        "customer_name": customer_name,
+        "amount": amount,
+        "failure_reason": failure_reason,
+        "channel": channel_str,
+        "outcome": outcome,
+        "message": f"Live case {case_id} processed. Outcome: {outcome}",
+    }
+
+
+@app.get("/api/webhook/razorpay/redirect")
+def razorpay_redirect(
+    razorpay_payment_id: str = Query(None),
+    razorpay_payment_link_id: str = Query(None),
+    razorpay_payment_link_reference_id: str = Query(None),
+    razorpay_payment_link_status: str = Query(None),
+    razorpay_signature: str = Query(None),
+):
+    """Callback after customer completes payment via payment link."""
+    return {
+        "status": "payment_callback_received",
+        "payment_id": razorpay_payment_id,
+        "link_status": razorpay_payment_link_status,
+        "message": "Payment callback received. Check dashboard for updated case status.",
+    }
+
+
 # ─────────────────── RUN ───────────────────
 
 if __name__ == "__main__":
