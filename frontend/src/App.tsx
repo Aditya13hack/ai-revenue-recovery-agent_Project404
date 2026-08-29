@@ -8,7 +8,7 @@ function App() {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col font-sans text-gray-200">
+    <div className="min-h-screen bg-gray-950 font-sans text-gray-200">
       {/* Header */}
       <header className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-3">
@@ -31,14 +31,14 @@ function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+      <main className="max-w-7xl w-full mx-auto p-6 space-y-6">
         {/* Top Metrics Row */}
         <section>
           <MetricsPanel />
         </section>
 
         {/* Case Explorer Section */}
-        <section className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+        <section className="bg-gray-900 border border-gray-800 rounded-xl shadow-xl">
           <div className="p-4 border-b border-gray-800 bg-gray-900/80 flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold text-gray-100">Live Recovery Cases</h2>

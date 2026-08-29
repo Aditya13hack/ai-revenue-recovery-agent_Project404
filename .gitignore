@@ -33,6 +33,9 @@ env/
 *.sqlite
 *.sqlite3
 
+# Generated TTS Audio Cache
+backend/voice/tts_cache/
+
 # Operating System Files
 .DS_Store
 Thumbs.db

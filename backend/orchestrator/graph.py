@@ -157,6 +157,7 @@ def validate_node(state: RecoveryState) -> RecoveryState:
         extension_days=prop.extension_days,
         promise_date=prop.promise_date,
         reasoning=prop.reasoning,
+        message_content=prop.message_content,
         decision=decision.decision.value if hasattr(decision.decision, "value") else str(decision.decision),
         decision_reason=decision.reason,
         rule_triggered=decision.rule_triggered,

@@ -36,7 +36,7 @@ export default function CaseList({ onSelectCase, selectedCaseId }: CaseListProps
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-950 text-gray-200">
+    <div className="bg-gray-950 text-gray-200">
       <div className="p-4 border-b border-gray-800 flex gap-4 bg-gray-900">
         <select 
           className="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
@@ -65,7 +65,7 @@ export default function CaseList({ onSelectCase, selectedCaseId }: CaseListProps
         {data && <span className="text-gray-500 text-sm self-center ml-auto">{data.total} total cases</span>}
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div>
         {loading ? (
           <div className="p-8 text-center text-gray-500">Loading cases...</div>
         ) : (

@@ -83,7 +83,7 @@ class ActionProposal(Base):
     extension_days = Column(Integer, nullable=True)
     promise_date = Column(String, nullable=True)
     reasoning = Column(Text, nullable=False)
-
+    message_content = Column(Text, nullable=True)       # LLM-generated Hinglish message for customer
     # Control plane decision
     decision = Column(String, nullable=True)             # execute / modify / escalate / block
     decision_reason = Column(Text, nullable=True)

@@ -203,23 +203,72 @@ def get_budget(db: Session = Depends(get_db_dependency)):
 
 # ─────────────────── VOICE ───────────────────
 
+import asyncio
+import edge_tts
+import tempfile
+
+# Cache dir for generated TTS audio
+TTS_CACHE_DIR = Path(__file__).parent / "voice" / "tts_cache"
+TTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+VOICE_AGENT = "hi-IN-MadhurNeural"      # Male Hindi neural voice
+VOICE_CUSTOMER = "hi-IN-SwaraNeural"     # Female Hindi neural voice
+
+
+def _generate_tts_sync(text: str, voice: str, output_path: Path):
+    """Generate TTS audio synchronously (runs edge-tts async internally)."""
+    async def _run():
+        communicate = edge_tts.Communicate(text, voice, rate="-5%")
+        await communicate.save(str(output_path))
+    
+    # Create a new event loop if needed (FastAPI may already have one)
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # We're inside an async context, use a thread
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                pool.submit(lambda: asyncio.run(_run())).result(timeout=30)
+        else:
+            loop.run_until_complete(_run())
+    except RuntimeError:
+        asyncio.run(_run())
+
+
 @app.get("/api/cases/{case_id}/audio")
 def get_audio(case_id: str, db: Session = Depends(get_db_dependency)):
+    """
+    Generate and serve TTS audio from the actual LLM-generated message for this case.
+    Falls back to demo files if no AI message exists.
+    """
     audio_dir = AUDIO_OUTPUT_DIR
-    
-    # 1. Direct match (e.g. CASE-001.mp3 or DEMO-HAPPY_PATH.mp3)
-    for ext in (".mp3", ".wav"):
-        audio_file = audio_dir / f"{case_id}{ext}"
-        if audio_file.exists():
-            return FileResponse(
-                str(audio_file),
-                media_type="audio/mpeg" if ext == ".mp3" else "audio/wav",
-            )
-    
-    # 2. Dynamic fallback matching the case status in database
+
+    # 1. Check TTS cache first (already generated for this case)
+    cached_file = TTS_CACHE_DIR / f"{case_id}.mp3"
+    if cached_file.exists():
+        return FileResponse(str(cached_file), media_type="audio/mpeg")
+
+    # 2. Look up the AI-generated message from action_proposals
+    proposal = (
+        db.query(ActionProposalModel)
+        .filter(ActionProposalModel.case_id == case_id)
+        .order_by(ActionProposalModel.created_at.desc())
+        .first()
+    )
+
+    if proposal and proposal.message_content:
+        message_text = proposal.message_content
+        try:
+            _generate_tts_sync(message_text, VOICE_AGENT, cached_file)
+            return FileResponse(str(cached_file), media_type="audio/mpeg")
+        except Exception as e:
+            # If TTS fails, fall through to demo files
+            pass
+
+    # 3. Fallback: static demo files based on case outcome
     case = db.query(Case).filter(Case.id == case_id).first()
     scenario = "DEMO-HAPPY_PATH.mp3"
-    
+
     if case:
         if case.outcome in ("escalated", "unresolved") or case.do_not_contact:
             scenario = "DEMO-ESCALATE_BLOCK.mp3"
@@ -227,12 +276,38 @@ def get_audio(case_id: str, db: Session = Depends(get_db_dependency)):
             scenario = "DEMO-MODIFY_MOMENT.mp3"
         else:
             scenario = "DEMO-HAPPY_PATH.mp3"
-            
+
     fallback_file = audio_dir / scenario
     if fallback_file.exists():
         return FileResponse(str(fallback_file), media_type="audio/mpeg")
 
     raise HTTPException(status_code=404, detail=f"No audio found for {case_id}")
+
+
+@app.get("/api/cases/{case_id}/message")
+def get_case_message(case_id: str, db: Session = Depends(get_db_dependency)):
+    """Return the raw AI-generated message text for a case."""
+    proposal = (
+        db.query(ActionProposalModel)
+        .filter(ActionProposalModel.case_id == case_id)
+        .order_by(ActionProposalModel.created_at.desc())
+        .first()
+    )
+
+    if proposal and proposal.message_content:
+        return {
+            "case_id": case_id,
+            "message": proposal.message_content,
+            "action_type": proposal.action_type,
+            "has_audio": (TTS_CACHE_DIR / f"{case_id}.mp3").exists(),
+        }
+
+    return {
+        "case_id": case_id,
+        "message": None,
+        "action_type": proposal.action_type if proposal else None,
+        "has_audio": False,
+    }
 
 
 # ─────────────────── DECISIONS ───────────────────
