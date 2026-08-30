@@ -8,10 +8,23 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setHasError(false);
     setIsPlaying(false);
+    setMessage(null);
+
+    // Fetch the transcript message
+    fetch(`/api/cases/${caseId}/message`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.message) {
+          setMessage(data.message);
+        }
+      })
+      .catch(() => {});
+
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.load();
@@ -33,6 +46,16 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
     }
   };
 
+  const handleRetry = () => {
+    setHasError(false);
+    if (audioRef.current) {
+      audioRef.current.load();
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setHasError(true));
+    }
+  };
+
   return (
     <div className="bg-gray-900/90 border border-blue-900/40 rounded-xl p-4 mb-6 shadow-lg">
       <div className="flex items-center justify-between mb-3">
@@ -43,16 +66,40 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
           </h4>
         </div>
         <span className="text-xs font-mono text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">
-          Edge-TTS Neural Audio
+          Edge-TTS Neural Audio (hi-IN)
         </span>
       </div>
 
+      {/* Message Transcript */}
+      {message && (
+        <div className="mb-3 p-3 bg-gray-950/70 border border-gray-800 rounded-lg">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-900">
+              AI Agent Script
+            </span>
+          </div>
+          <p className="text-xs text-gray-300 leading-relaxed italic">
+            "{message}"
+          </p>
+        </div>
+      )}
+
       {hasError ? (
-        <div className="text-amber-400/90 text-xs bg-amber-950/40 border border-amber-800/50 p-3 rounded-lg flex items-center gap-2">
-          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span>Audio call recording unavailable for this channel type.</span>
+        <div className="space-y-2">
+          <div className="text-amber-400/90 text-xs bg-amber-950/40 border border-amber-800/50 p-3 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>Audio generation delayed. Click retry to load.</span>
+            </div>
+            <button
+              onClick={handleRetry}
+              className="px-2.5 py-1 text-xs bg-amber-900/60 hover:bg-amber-800 text-amber-200 rounded border border-amber-700 transition"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -86,7 +133,7 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
             />
           </div>
           <p className="text-[11px] text-gray-400 italic">
-            * Simulated Indian fintech customer interaction in natural Hinglish.
+            * Real-time neural voice synthesis generated from the LLM's custom proposal.
           </p>
         </div>
       )}
