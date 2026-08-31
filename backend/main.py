@@ -51,8 +51,11 @@ def health_check():
 # ─────────────────── METRICS ───────────────────
 
 @app.get("/api/metrics")
-def get_metrics(db: Session = Depends(get_db_dependency)):
-    metrics = compute_batch_metrics(db)
+def get_metrics(
+    data_mode: str = Query("all", description="all | synthetic | live"),
+    db: Session = Depends(get_db_dependency)
+):
+    metrics = compute_batch_metrics(db, data_mode=data_mode)
     return metrics.model_dump()
 
 
@@ -60,6 +63,7 @@ def get_metrics(db: Session = Depends(get_db_dependency)):
 
 @app.get("/api/cases")
 def list_cases(
+    data_mode: str = Query("all", description="all | synthetic | live"),
     outcome: Optional[str] = Query(None, description="Filter by outcome"),
     channel: Optional[str] = Query(None, description="Filter by assigned channel"),
     value_tier: Optional[str] = Query(None, description="Filter by value tier"),
@@ -70,6 +74,11 @@ def list_cases(
     db: Session = Depends(get_db_dependency),
 ):
     query = db.query(Case)
+
+    if data_mode == "synthetic":
+        query = query.filter(~Case.id.like("RZP-%"), ~Case.id.like("LIVE-%"))
+    elif data_mode == "live":
+        query = query.filter((Case.id.like("RZP-%")) | (Case.id.like("LIVE-%")))
 
     if outcome:
         query = query.filter(Case.outcome == outcome)

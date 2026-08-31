@@ -8,12 +8,23 @@ from backend.database.models import Case, ActionProposal, CampaignBudget
 from backend.reasoning.schemas import BatchMetrics
 
 
-def compute_batch_metrics(session: Session) -> BatchMetrics:
+def compute_batch_metrics(session: Session, data_mode: str = "all") -> BatchMetrics:
     """
-    Compute honest, unpadded metrics across the full synthetic batch.
-    No cherry-picking - every case is included.
+    Compute honest, unpadded metrics.
+    data_mode options:
+      - 'all': all cases
+      - 'synthetic': benchmark dataset cases (CASE-*)
+      - 'live': real Razorpay webhook cases (RZP-*, LIVE-*)
     """
-    cases = session.query(Case).all()
+    all_cases = session.query(Case).all()
+
+    if data_mode == "synthetic":
+        cases = [c for c in all_cases if not (c.id.startswith("RZP-") or c.id.startswith("LIVE-"))]
+    elif data_mode == "live":
+        cases = [c for c in all_cases if c.id.startswith("RZP-") or c.id.startswith("LIVE-")]
+    else:
+        cases = all_cases
+
     total_cases = len(cases)
 
     if total_cases == 0:
@@ -46,7 +57,9 @@ def compute_batch_metrics(session: Session) -> BatchMetrics:
     human_assisted_recovery_rate = len(human_assisted) / total_cases if total_cases else 0
 
     # --- Control plane metrics ---
-    proposals = session.query(ActionProposal).all()
+    case_ids = {c.id for c in cases}
+    all_proposals = session.query(ActionProposal).all()
+    proposals = [p for p in all_proposals if p.case_id in case_ids]
 
     blocked_count = sum(1 for p in proposals if p.decision == "block")
     modified_count = sum(1 for p in proposals if p.decision == "modify")

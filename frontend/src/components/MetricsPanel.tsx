@@ -1,20 +1,53 @@
 import { useMetrics, useBudget } from '../hooks/useApi';
 import BudgetGauge from './BudgetGauge';
 
-export default function MetricsPanel() {
-  const { data: metrics, loading: metricsLoading } = useMetrics();
+interface MetricsPanelProps {
+  dataMode: string;
+}
+
+export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
+  const { data: metrics, loading: metricsLoading } = useMetrics(dataMode);
   const { data: budget, loading: budgetLoading } = useBudget();
 
-  if (metricsLoading || budgetLoading) return <div className="text-gray-400 p-8 text-center bg-gray-900 rounded-xl border border-gray-800 animate-pulse">Loading recovery metrics...</div>;
-  if (!metrics) return <div className="text-red-400 p-6 bg-gray-900 rounded-xl border border-red-900/50">Error loading metrics from API</div>;
+  if (metricsLoading || budgetLoading) {
+    return (
+      <div className="text-gray-400 p-8 text-center bg-gray-900 rounded-xl border border-gray-800 animate-pulse">
+        Loading {dataMode === 'live' ? 'Live Razorpay' : dataMode === 'synthetic' ? 'Synthetic Benchmark' : 'All'} metrics...
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="text-red-400 p-6 bg-gray-900 rounded-xl border border-red-900/50">
+        Error loading metrics from API
+      </div>
+    );
+  }
 
   const recoveryPct = (metrics.recovery_rate * 100);
 
   return (
     <div className="space-y-6">
       {/* Headline Banner */}
-      <div className="bg-gradient-to-r from-gray-900 via-gray-850 to-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg text-center">
-        <span className="text-xs uppercase tracking-widest text-blue-400 font-bold">Buildathon Track 03 Proof of Value</span>
+      <div className="bg-gradient-to-r from-gray-900 via-gray-850 to-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg text-center relative overflow-hidden">
+        <div className="flex items-center justify-center gap-2 mb-1">
+          {dataMode === 'live' ? (
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-emerald-400 font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-700/60">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              Live Mode — Real Razorpay API Webhooks
+            </span>
+          ) : dataMode === 'synthetic' ? (
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-blue-400 font-bold bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-700/60">
+              📊 Benchmark Mode — 200 Synthetic Cases
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-purple-400 font-bold bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-700/60">
+              🌐 Combined View — Real API + Benchmark
+            </span>
+          )}
+        </div>
+
         <h2 className="text-2xl md:text-3xl font-extrabold mt-1 text-gray-100">
           <span className="text-red-400">₹{metrics.total_revenue_at_risk.toLocaleString()}</span>
           <span className="text-gray-500 mx-3">→</span>
@@ -37,7 +70,9 @@ export default function MetricsPanel() {
           <p className="text-3xl font-bold text-red-400 tracking-tight">
             ₹{metrics.total_revenue_at_risk.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
-          <p className="text-gray-400 text-xs mt-2 font-medium">{metrics.total_cases} total failed cases</p>
+          <p className="text-gray-400 text-xs mt-2 font-medium">
+            {metrics.total_cases} {dataMode === 'live' ? 'live test' : dataMode === 'synthetic' ? 'synthetic' : 'total'} cases
+          </p>
         </div>
 
         {/* Net Revenue Recovered */}
