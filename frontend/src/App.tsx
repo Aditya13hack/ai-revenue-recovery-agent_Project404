@@ -2,10 +2,12 @@ import { useState } from 'react';
 import MetricsPanel from './components/MetricsPanel';
 import CaseList from './components/CaseList';
 import CaseDetail from './components/CaseDetail';
+import GraphVisualizer from './components/GraphVisualizer';
 import './App.css';
 
 function App() {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const [showGraph, setShowGraph] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-950 font-sans text-gray-200">
@@ -25,8 +27,16 @@ function App() {
             <p className="text-xs text-gray-400">Razorpay AI Buildathon 2026 • Deterministic Control Plane Architecture</p>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-xs text-gray-500 font-mono">SQLite DB • Groq Llama/Qwen • Edge-TTS</span>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowGraph(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-lg shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <span>⚡</span>
+            <span>View LangGraph Pipeline</span>
+          </button>
+          <span className="text-xs text-gray-500 font-mono hidden md:inline">SQLite • Groq • Edge-TTS</span>
         </div>
       </header>
 
@@ -62,6 +72,11 @@ function App() {
             />
           </div>
         </div>
+      )}
+
+      {/* Interactive LangGraph Architecture Visualizer Modal */}
+      {showGraph && (
+        <GraphVisualizer onClose={() => setShowGraph(false)} />
       )}
     </div>
   );
