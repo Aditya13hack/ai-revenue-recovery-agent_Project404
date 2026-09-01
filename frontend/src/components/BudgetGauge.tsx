@@ -5,9 +5,14 @@ interface BudgetGaugeProps {
 }
 
 export default function BudgetGauge({ budget }: BudgetGaugeProps) {
-  if (!budget) return null;
+  if (!budget || typeof budget.total_budget !== 'number' || typeof budget.remaining !== 'number') {
+    return null;
+  }
 
-  const percentLeft = Math.max(0, (budget.remaining / budget.total_budget) * 100);
+  const totalBudget = budget.total_budget || 50000;
+  const remaining = budget.remaining ?? totalBudget;
+  const spent = budget.spent ?? 0;
+  const percentLeft = Math.max(0, Math.min(100, (remaining / totalBudget) * 100));
   
   let color = 'bg-gradient-to-r from-emerald-500 to-teal-500';
   let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -30,7 +35,7 @@ export default function BudgetGauge({ budget }: BudgetGaugeProps) {
           <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${badgeColor}`}>
             {percentLeft.toFixed(0)}% Remaining
           </span>
-          <span className="text-lg font-black text-slate-900">₹{budget.remaining.toLocaleString()}</span>
+          <span className="text-lg font-black text-slate-900">₹{remaining.toLocaleString()}</span>
         </div>
       </div>
       
@@ -42,8 +47,8 @@ export default function BudgetGauge({ budget }: BudgetGaugeProps) {
       </div>
       
       <div className="flex justify-between text-xs text-slate-500 font-medium mb-3">
-        <span>Spent: <strong className="text-slate-700">₹{budget.spent.toLocaleString()}</strong></span>
-        <span>Total Cap: <strong className="text-slate-700">₹{budget.total_budget.toLocaleString()}</strong></span>
+        <span>Spent: <strong className="text-slate-700">₹{spent.toLocaleString()}</strong></span>
+        <span>Total Cap: <strong className="text-slate-700">₹{totalBudget.toLocaleString()}</strong></span>
       </div>
 
       {budget.is_exhausted && (
@@ -61,7 +66,7 @@ export default function BudgetGauge({ budget }: BudgetGaugeProps) {
               <div key={i} className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-lg border border-slate-100 transition-colors">
                 <span className="font-mono font-bold text-indigo-600 truncate w-24">{tx.case_id}</span>
                 <span className="text-slate-600 truncate flex-1 mx-2 text-[11px]">{tx.description}</span>
-                <span className="font-bold text-rose-600">-₹{tx.amount.toLocaleString()}</span>
+                <span className="font-bold text-rose-600">-₹{(tx.amount ?? 0).toLocaleString()}</span>
               </div>
             ))}
           </div>

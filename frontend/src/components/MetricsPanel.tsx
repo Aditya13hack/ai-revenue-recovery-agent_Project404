@@ -25,7 +25,15 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
     );
   }
 
-  const recoveryPct = (metrics.recovery_rate * 100);
+  const atRisk = metrics.total_revenue_at_risk ?? 0;
+  const recovered = metrics.net_revenue_recovered ?? 0;
+  const discounts = metrics.total_discounts_given ?? 0;
+  const recoveryPct = (metrics.recovery_rate ?? 0) * 100;
+  const totalCases = metrics.total_cases ?? 0;
+  const blockedCount = metrics.blocked_action_count ?? 0;
+  const modifiedCount = metrics.modified_action_count ?? 0;
+  const escalationCount = metrics.escalation_count ?? 0;
+  const autoRate = (metrics.autonomous_recovery_rate ?? 0) * 100;
 
   return (
     <div className="space-y-5">
@@ -49,12 +57,12 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
         </div>
 
         <h2 className="text-2xl md:text-3xl font-extrabold mt-1 text-slate-900 tracking-tight">
-          <span className="text-rose-600">₹{metrics.total_revenue_at_risk.toLocaleString()}</span>
+          <span className="text-rose-600">₹{atRisk.toLocaleString()}</span>
           <span className="text-slate-400 mx-3 font-light">→</span>
-          <span className="text-emerald-600 font-black">₹{metrics.net_revenue_recovered.toLocaleString()}</span>
+          <span className="text-emerald-600 font-black">₹{recovered.toLocaleString()}</span>
           <span className="text-slate-600 font-medium text-base md:text-lg ml-2">net recovered</span>
           <span className="text-slate-300 mx-3 font-light">|</span>
-          <span className="text-amber-600 font-bold">{metrics.blocked_action_count + metrics.modified_action_count}</span>
+          <span className="text-amber-600 font-bold">{blockedCount + modifiedCount}</span>
           <span className="text-slate-600 text-base md:text-lg ml-1.5 font-medium">unsafe AI actions prevented</span>
         </h2>
       </div>
@@ -68,11 +76,11 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
           </div>
           <p className="text-3xl font-black text-rose-600 tracking-tight">
-            ₹{metrics.total_revenue_at_risk.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            ₹{atRisk.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
             <span className="text-slate-500">Failed Volume</span>
-            <span className="font-semibold text-slate-700">{metrics.total_cases} cases</span>
+            <span className="font-semibold text-slate-700">{totalCases} cases</span>
           </div>
         </div>
 
@@ -85,11 +93,11 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
             </span>
           </div>
           <p className="text-3xl font-black text-emerald-600 tracking-tight">
-            ₹{metrics.net_revenue_recovered.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+            ₹{recovered.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
             <span className="text-slate-500">Discounts Incurred</span>
-            <span className="font-semibold text-slate-700">₹{metrics.total_discounts_given.toLocaleString()}</span>
+            <span className="font-semibold text-slate-700">₹{discounts.toLocaleString()}</span>
           </div>
         </div>
 
@@ -108,7 +116,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
           </div>
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
             <span className="text-slate-500">Autonomous</span>
-            <span className="font-semibold text-slate-700">{(metrics.autonomous_recovery_rate * 100).toFixed(0)}%</span>
+            <span className="font-semibold text-slate-700">{autoRate.toFixed(0)}%</span>
           </div>
         </div>
 
@@ -124,15 +132,15 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-600 font-medium">Blocked Bad Actions</span>
-                <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">{metrics.blocked_action_count}</span>
+                <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">{blockedCount}</span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-600 font-medium">Modified (Capped)</span>
-                <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">{metrics.modified_action_count}</span>
+                <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">{modifiedCount}</span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-600 font-medium">Human Escalated</span>
-                <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{metrics.escalation_count}</span>
+                <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{escalationCount}</span>
               </div>
             </div>
           </div>

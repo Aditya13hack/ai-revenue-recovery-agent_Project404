@@ -186,7 +186,14 @@ def get_summary(case_id: str, db: Session = Depends(get_db_dependency)):
 def get_budget(db: Session = Depends(get_db_dependency)):
     budget = db.query(CampaignBudget).first()
     if not budget:
-        return {"error": "No budget record found"}
+        return {
+            "total_budget": 50000.0,
+            "spent": 0.0,
+            "remaining": 50000.0,
+            "is_exhausted": False,
+            "exhausted_at_case": None,
+            "transactions": [],
+        }
 
     transactions = db.query(BudgetTransaction).order_by(BudgetTransaction.created_at).all()
 
