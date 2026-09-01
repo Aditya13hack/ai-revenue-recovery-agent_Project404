@@ -11,7 +11,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
 
   if (metricsLoading || budgetLoading) {
     return (
-      <div className="text-gray-400 p-8 text-center bg-gray-900 rounded-xl border border-gray-800 animate-pulse">
+      <div className="text-slate-400 p-8 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs animate-pulse">
         Loading {dataMode === 'live' ? 'Live Razorpay' : dataMode === 'synthetic' ? 'Synthetic Benchmark' : 'All'} metrics...
       </div>
     );
@@ -19,7 +19,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
 
   if (!metrics) {
     return (
-      <div className="text-red-400 p-6 bg-gray-900 rounded-xl border border-red-900/50">
+      <div className="text-rose-600 p-6 bg-rose-50 rounded-2xl border border-rose-200">
         Error loading metrics from API
       </div>
     );
@@ -28,93 +28,113 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
   const recoveryPct = (metrics.recovery_rate * 100);
 
   return (
-    <div className="space-y-6">
-      {/* Headline Banner */}
-      <div className="bg-gradient-to-r from-gray-900 via-gray-850 to-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg text-center relative overflow-hidden">
-        <div className="flex items-center justify-center gap-2 mb-1">
+    <div className="space-y-5">
+      {/* Headline Banner with Soft Fusion Pastel Gradient */}
+      <div className="bg-gradient-to-r from-indigo-50/90 via-purple-50/70 to-emerald-50/90 p-6 rounded-2xl border border-indigo-100/80 shadow-xs text-center relative overflow-hidden">
+        <div className="flex items-center justify-center gap-2 mb-1.5">
           {dataMode === 'live' ? (
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-emerald-400 font-bold bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-700/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              Live Mode — Real Razorpay API Webhooks
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-emerald-700 font-bold bg-emerald-100/80 px-3 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              Live Pipeline Active
             </span>
           ) : dataMode === 'synthetic' ? (
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-blue-400 font-bold bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-700/60">
-              📊 Benchmark Mode — 200 Synthetic Cases
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-indigo-700 font-bold bg-indigo-100/80 px-3 py-0.5 rounded-full border border-indigo-200 shadow-2xs">
+              📊 Benchmark Verification
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-purple-400 font-bold bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-700/60">
-              🌐 Combined View — Real API + Benchmark
+            <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-purple-700 font-bold bg-purple-100/80 px-3 py-0.5 rounded-full border border-purple-200 shadow-2xs">
+              🌐 Combined Portfolio Overview
             </span>
           )}
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-extrabold mt-1 text-gray-100">
-          <span className="text-red-400">₹{metrics.total_revenue_at_risk.toLocaleString()}</span>
-          <span className="text-gray-500 mx-3">→</span>
-          <span className="text-green-400 font-black">₹{metrics.net_revenue_recovered.toLocaleString()}</span>
-          <span className="text-gray-400 font-medium text-lg ml-2">recovered</span>
-          <span className="text-gray-600 mx-3 font-light">|</span>
-          <span className="text-yellow-400 font-bold">{metrics.blocked_action_count + metrics.modified_action_count}</span>
-          <span className="text-gray-400 text-lg ml-1.5 font-medium">unsafe AI actions prevented</span>
+        <h2 className="text-2xl md:text-3xl font-extrabold mt-1 text-slate-900 tracking-tight">
+          <span className="text-rose-600">₹{metrics.total_revenue_at_risk.toLocaleString()}</span>
+          <span className="text-slate-400 mx-3 font-light">→</span>
+          <span className="text-emerald-600 font-black">₹{metrics.net_revenue_recovered.toLocaleString()}</span>
+          <span className="text-slate-600 font-medium text-base md:text-lg ml-2">net recovered</span>
+          <span className="text-slate-300 mx-3 font-light">|</span>
+          <span className="text-amber-600 font-bold">{metrics.blocked_action_count + metrics.modified_action_count}</span>
+          <span className="text-slate-600 text-base md:text-lg ml-1.5 font-medium">unsafe AI actions prevented</span>
         </h2>
       </div>
 
       {/* Hero Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue at Risk */}
-        <div className="bg-gray-900 rounded-xl p-5 shadow-lg border border-red-900/30 hover:border-red-800/60 transition-colors">
+        <div className="bg-white rounded-2xl p-5 shadow-xs border border-rose-100 hover:border-rose-300 hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Revenue at Risk</h3>
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Revenue at Risk</h3>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
           </div>
-          <p className="text-3xl font-bold text-red-400 tracking-tight">
+          <p className="text-3xl font-black text-rose-600 tracking-tight">
             ₹{metrics.total_revenue_at_risk.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
-          <p className="text-gray-400 text-xs mt-2 font-medium">
-            {metrics.total_cases} {dataMode === 'live' ? 'live test' : dataMode === 'synthetic' ? 'synthetic' : 'total'} cases
-          </p>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+            <span className="text-slate-500">Failed Volume</span>
+            <span className="font-semibold text-slate-700">{metrics.total_cases} cases</span>
+          </div>
         </div>
 
         {/* Net Revenue Recovered */}
-        <div className="bg-gray-900 rounded-xl p-5 shadow-lg border border-green-900/30 hover:border-green-800/60 transition-colors">
+        <div className="bg-white rounded-2xl p-5 shadow-xs border border-emerald-100 hover:border-emerald-300 hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Net Recovered</h3>
-            <span className="text-xs font-bold text-green-400 bg-green-950 px-2 py-0.5 rounded border border-green-800/40">ROI +</span>
+            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Net Recovered</h3>
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              Positive ROI
+            </span>
           </div>
-          <p className="text-3xl font-bold text-green-400 tracking-tight">
+          <p className="text-3xl font-black text-emerald-600 tracking-tight">
             ₹{metrics.net_revenue_recovered.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
-          <p className="text-gray-400 text-xs mt-2 font-medium">Discounts given: ₹{metrics.total_discounts_given.toLocaleString()}</p>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+            <span className="text-slate-500">Discounts Incurred</span>
+            <span className="font-semibold text-slate-700">₹{metrics.total_discounts_given.toLocaleString()}</span>
+          </div>
         </div>
 
         {/* Recovery Rate */}
-        <div className="bg-gray-900 rounded-xl p-5 shadow-lg border border-gray-800 hover:border-blue-900/50 transition-colors">
+        <div className="bg-white rounded-2xl p-5 shadow-xs border border-indigo-100 hover:border-indigo-300 hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-gray-400 text-xs font-semibold uppercase tracking-wider">Recovery Rate</h3>
-            <span className="text-xs font-bold text-blue-400">{recoveryPct.toFixed(1)}%</span>
+            <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Recovery Rate</h3>
+            <span className="text-xs font-black text-indigo-600">{recoveryPct.toFixed(1)}%</span>
           </div>
-          <p className="text-3xl font-bold text-blue-400 tracking-tight">{recoveryPct.toFixed(1)}%</p>
-          <div className="w-full bg-gray-800 rounded-full h-2 mt-3 overflow-hidden">
-            <div className="bg-blue-500 h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(recoveryPct, 100)}%` }}></div>
+          <p className="text-3xl font-black text-indigo-600 tracking-tight">{recoveryPct.toFixed(1)}%</p>
+          <div className="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-indigo-500 to-blue-500 h-2 rounded-full transition-all duration-500 shadow-xs" 
+              style={{ width: `${Math.min(recoveryPct, 100)}%` }}
+            ></div>
           </div>
-          <p className="text-gray-400 text-xs mt-2 font-medium">
-            Autonomous: {(metrics.autonomous_recovery_rate * 100).toFixed(0)}% • Escalated: {(metrics.escalation_rate * 100).toFixed(0)}%
-          </p>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 text-xs">
+            <span className="text-slate-500">Autonomous</span>
+            <span className="font-semibold text-slate-700">{(metrics.autonomous_recovery_rate * 100).toFixed(0)}%</span>
+          </div>
         </div>
 
         {/* Control Plane Guardrails */}
-        <div className="bg-gray-900 rounded-xl p-5 shadow-lg border border-gray-800 flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-gray-400 text-xs font-medium">Blocked Bad Actions</span>
-            <span className="text-lg font-bold text-red-400">{metrics.blocked_action_count}</span>
-          </div>
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-gray-400 text-xs font-medium">Modified (Capped)</span>
-            <span className="text-lg font-bold text-yellow-400">{metrics.modified_action_count}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400 text-xs font-medium">Human Escalations</span>
-            <span className="text-lg font-bold text-orange-400">{metrics.escalation_count}</span>
+        <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Control Plane</h3>
+              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                8 Rules Active
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-600 font-medium">Blocked Bad Actions</span>
+                <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">{metrics.blocked_action_count}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-600 font-medium">Modified (Capped)</span>
+                <span className="font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">{metrics.modified_action_count}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-600 font-medium">Human Escalated</span>
+                <span className="font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200">{metrics.escalation_count}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

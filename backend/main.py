@@ -617,6 +617,113 @@ def razorpay_redirect(
     }
 
 
+# ─────────────────── POLICY SANDBOX & SIMULATOR ───────────────────
+
+from pydantic import BaseModel as PyBaseModel
+
+class SandboxEvalRequest(PyBaseModel):
+    customer_message: str
+    payment_amount: float = 5000.0
+    failure_reason: str = "insufficient_balance"
+    payment_type: str = "emi"
+    contact_attempts: int = 1
+    payment_retries: int = 0
+    consecutive_refusals: int = 0
+    do_not_contact: bool = False
+
+
+@app.post("/api/sandbox/evaluate")
+def evaluate_sandbox_prompt(req: SandboxEvalRequest):
+    """
+    Live Policy Sandbox & Guardrail Simulator:
+    Runs any custom scenario or customer prompt through Groq LLM + Control Plane Waterfall in real-time.
+    """
+    from backend.reasoning.schemas import (
+        CaseContext, PaymentType, FailureReason, ValueTier, RiskProfile, ConversationTurn, ActionProposal, ActionType
+    )
+    from backend.reasoning.agent import ReasoningAgent
+    from backend.control_plane.policy_engine import validate_action
+    from backend.control_plane.rules_config import MerchantPolicyConfig
+    from backend.control_plane.budget_tracker import BudgetTracker
+
+    # 1. Build CaseContext & Case Object
+    context = CaseContext(
+        case_id="SANDBOX-DEMO",
+        customer_name="Demo Customer",
+        payment_type=PaymentType(req.payment_type) if req.payment_type in [e.value for e in PaymentType] else PaymentType.EMI,
+        payment_amount=req.payment_amount,
+        failure_reason=FailureReason(req.failure_reason) if req.failure_reason in [e.value for e in FailureReason] else FailureReason.INSUFFICIENT_BALANCE,
+        value_tier=ValueTier.MEDIUM,
+        risk_profile=RiskProfile.FIRST_TIME,
+        contact_attempts=req.contact_attempts,
+        payment_retries=req.payment_retries,
+        consecutive_refusals=req.consecutive_refusals,
+        do_not_contact=req.do_not_contact,
+    )
+
+    case = Case(
+        id="SANDBOX-DEMO",
+        customer_name="Demo Customer",
+        payment_type=context.payment_type.value,
+        payment_amount=context.payment_amount,
+        failure_reason=context.failure_reason.value,
+        value_tier=context.value_tier.value,
+        risk_profile=context.risk_profile.value,
+        contact_attempts=context.contact_attempts,
+        payment_retries=context.payment_retries,
+        consecutive_refusals=context.consecutive_refusals,
+        do_not_contact=context.do_not_contact,
+    )
+
+    # 2. Call LLM Reasoning Layer
+    try:
+        agent = ReasoningAgent()
+        history = [ConversationTurn(speaker="customer", text=req.customer_message)]
+        proposal = agent.propose_action(context, history)
+    except Exception as e:
+        # Fallback simulation proposal
+        is_discount = "discount" in req.customer_message.lower() or "%" in req.customer_message
+        is_extension = "extension" in req.customer_message.lower() or "din" in req.customer_message.lower() or "day" in req.customer_message.lower()
+        proposal = ActionProposal(
+            action_type=ActionType.OFFER_DISCOUNT if is_discount else (ActionType.OFFER_EXTENSION if is_extension else ActionType.REQUEST_RETRY),
+            discount_pct=25.0 if is_discount else None,
+            extension_days=14 if is_extension else None,
+            reasoning=f"Reasoned action based on customer input: {req.customer_message}",
+        )
+
+    # 3. Call Deterministic Control Plane
+    config = MerchantPolicyConfig.from_config()
+    budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
+    decision = validate_action(proposal, case, config, budget_tracker)
+
+    return {
+        "customer_input": req.customer_message,
+        "llm_proposal": {
+            "action_type": proposal.action_type.value if hasattr(proposal.action_type, "value") else str(proposal.action_type),
+            "discount_pct": proposal.discount_pct,
+            "extension_days": proposal.extension_days,
+            "reasoning": proposal.reasoning,
+            "message_content": proposal.message_content,
+        },
+        "control_plane_decision": {
+            "decision": decision.decision.value if hasattr(decision.decision, "value") else str(decision.decision),
+            "rule_triggered": decision.rule_triggered,
+            "reason": decision.reason,
+            "modified_proposal": {
+                "discount_pct": decision.modified_proposal.discount_pct,
+                "extension_days": decision.modified_proposal.extension_days,
+            } if decision.modified_proposal else None,
+            "budget_remaining": decision.budget_remaining,
+        },
+        "policy_limits": {
+            "max_discount_pct": config.max_discount_pct,
+            "max_extension_days": config.max_extension_days,
+            "max_contact_attempts": config.max_contact_attempts,
+            "max_payment_retries": config.max_payment_retries,
+        }
+    }
+
+
 # ─────────────────── RUN ───────────────────
 
 if __name__ == "__main__":

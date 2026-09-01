@@ -9,44 +9,59 @@ export default function BudgetGauge({ budget }: BudgetGaugeProps) {
 
   const percentLeft = Math.max(0, (budget.remaining / budget.total_budget) * 100);
   
-  let color = 'bg-green-500';
-  if (percentLeft < 20) color = 'bg-red-500';
-  else if (percentLeft < 50) color = 'bg-yellow-500';
+  let color = 'bg-gradient-to-r from-emerald-500 to-teal-500';
+  let badgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  if (percentLeft < 20) {
+    color = 'bg-gradient-to-r from-rose-500 to-red-500';
+    badgeColor = 'bg-rose-50 text-rose-700 border-rose-200';
+  } else if (percentLeft < 50) {
+    color = 'bg-gradient-to-r from-amber-500 to-yellow-500';
+    badgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+  }
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-      <div className="flex justify-between items-end mb-2">
-        <h3 className="text-gray-400 text-sm font-medium uppercase">Recovery Budget</h3>
-        <span className="text-xl font-bold text-gray-200">Rs.{budget.remaining.toLocaleString()}</span>
+    <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
+      <div className="flex justify-between items-end mb-3">
+        <div>
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Merchant Campaign Incentive Budget</span>
+          <h3 className="text-sm font-bold text-slate-800 mt-0.5">Budget Capacity & Live Expenditure</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${badgeColor}`}>
+            {percentLeft.toFixed(0)}% Remaining
+          </span>
+          <span className="text-lg font-black text-slate-900">₹{budget.remaining.toLocaleString()}</span>
+        </div>
       </div>
       
-      <div className="w-full bg-gray-900 rounded-full h-3 mb-2 border border-gray-700">
+      <div className="w-full bg-slate-100 rounded-full h-3 mb-2.5 overflow-hidden p-0.5 border border-slate-200/60">
         <div 
-          className={`h-3 rounded-full transition-all duration-500 ${color}`} 
+          className={`h-2 rounded-full transition-all duration-500 shadow-xs ${color}`} 
           style={{ width: `${percentLeft}%` }}
         ></div>
       </div>
       
-      <div className="flex justify-between text-xs text-gray-500 mb-2">
-        <span>Spent: Rs.{budget.spent.toLocaleString()}</span>
-        <span>Total: Rs.{budget.total_budget.toLocaleString()}</span>
+      <div className="flex justify-between text-xs text-slate-500 font-medium mb-3">
+        <span>Spent: <strong className="text-slate-700">₹{budget.spent.toLocaleString()}</strong></span>
+        <span>Total Cap: <strong className="text-slate-700">₹{budget.total_budget.toLocaleString()}</strong></span>
       </div>
 
       {budget.is_exhausted && (
-        <div className="bg-red-900/50 border border-red-800 text-red-300 p-2 rounded text-xs mb-3 font-medium text-center">
-          BUDGET EXHAUSTED {budget.exhausted_at_case ? `at ${budget.exhausted_at_case}` : ''}
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 p-2.5 rounded-xl text-xs mb-3 font-semibold text-center flex items-center justify-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>CAMPAIGN BUDGET EXHAUSTED {budget.exhausted_at_case ? `at ${budget.exhausted_at_case}` : ''} — Zero-discount policy enforced.</span>
         </div>
       )}
 
       {budget.transactions && budget.transactions.length > 0 && (
-        <div className="mt-2">
-          <h4 className="text-xs text-gray-400 mb-2 font-medium">Recent Transactions</h4>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
+        <div className="mt-4 pt-3 border-t border-slate-100">
+          <h4 className="text-xs text-slate-500 mb-2 font-bold uppercase tracking-wider">Live Budget Ledger (Recent Deductions)</h4>
+          <div className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
             {budget.transactions.slice(-5).reverse().map((tx, i) => (
-              <div key={i} className="flex justify-between text-xs py-1 border-b border-gray-700/50">
-                <span className="text-gray-400 truncate w-24">{tx.case_id}</span>
-                <span className="text-gray-500 truncate flex-1 mx-2">{tx.description}</span>
-                <span className="text-red-400">-Rs.{tx.amount.toLocaleString()}</span>
+              <div key={i} className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-slate-50 hover:bg-slate-100/80 rounded-lg border border-slate-100 transition-colors">
+                <span className="font-mono font-bold text-indigo-600 truncate w-24">{tx.case_id}</span>
+                <span className="text-slate-600 truncate flex-1 mx-2 text-[11px]">{tx.description}</span>
+                <span className="font-bold text-rose-600">-₹{tx.amount.toLocaleString()}</span>
               </div>
             ))}
           </div>

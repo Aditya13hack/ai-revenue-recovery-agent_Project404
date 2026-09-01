@@ -27,33 +27,34 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
 
   const getChannelBadge = (ch: string | null) => {
     switch (ch) {
-      case 'voice': return 'bg-blue-900 text-blue-300';
-      case 'sms': case 'whatsapp': return 'bg-green-900 text-green-300';
-      case 'silent_retry': return 'bg-gray-700 text-gray-300';
-      case 'human_escalation': return 'bg-red-900 text-red-300';
-      default: return 'bg-gray-700 text-gray-300';
+      case 'voice': return 'bg-blue-50 text-blue-700 border-blue-200/80';
+      case 'sms': case 'whatsapp': return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'silent_retry': return 'bg-slate-100 text-slate-700 border-slate-200';
+      case 'human_escalation': return 'bg-rose-50 text-rose-700 border-rose-200';
+      default: return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
 
   const getOutcomeBadge = (out: string | null) => {
     switch (out) {
-      case 'recovered': return 'bg-green-900/50 text-green-400 border border-green-800';
-      case 'partially_recovered': return 'bg-yellow-900/50 text-yellow-400 border border-yellow-800';
-      case 'escalated': return 'bg-orange-900/50 text-orange-400 border border-orange-800';
-      case 'unresolved': return 'bg-red-900/50 text-red-400 border border-red-800';
-      case 'do_not_contact': return 'bg-red-900/50 text-red-400 border border-red-800';
-      default: return 'bg-gray-800 text-gray-400 border border-gray-700';
+      case 'recovered': return 'bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold';
+      case 'partially_recovered': return 'bg-amber-50 text-amber-700 border-amber-200 font-semibold';
+      case 'escalated': return 'bg-orange-50 text-orange-700 border-orange-200 font-semibold';
+      case 'unresolved': return 'bg-rose-50 text-rose-700 border-rose-200 font-semibold';
+      case 'do_not_contact': return 'bg-rose-50 text-rose-700 border-rose-200 font-semibold';
+      default: return 'bg-slate-100 text-slate-600 border-slate-200';
     }
   };
 
   const isLiveCase = (id: string) => id.startsWith('RZP-') || id.startsWith('LIVE-');
 
   return (
-    <div className="bg-gray-950 text-gray-200">
-      <div className="p-4 border-b border-gray-800 flex flex-wrap gap-4 bg-gray-900 items-center justify-between">
+    <div className="bg-white text-slate-800">
+      {/* Filters Toolbar */}
+      <div className="p-4 border-b border-slate-200/80 flex flex-wrap gap-4 bg-slate-50/50 items-center justify-between">
         <div className="flex flex-wrap gap-3 items-center">
           <select 
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+            className="bg-white border border-slate-300/80 text-slate-700 rounded-xl px-3.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs transition"
             value={outcome}
             onChange={(e) => { setOutcome(e.target.value); setPage(1); }}
           >
@@ -65,13 +66,13 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
           </select>
 
           <select 
-            className="bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
+            className="bg-white border border-slate-300/80 text-slate-700 rounded-xl px-3.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs transition"
             value={channel}
             onChange={(e) => { setChannel(e.target.value); setPage(1); }}
           >
             <option value="">All Channels</option>
-            <option value="voice">Voice</option>
-            <option value="sms">SMS</option>
+            <option value="voice">Voice Call</option>
+            <option value="sms">SMS / WhatsApp</option>
             <option value="silent_retry">Silent Retry</option>
             <option value="human_escalation">Human Escalation</option>
           </select>
@@ -79,78 +80,84 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
 
         {data && (
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-400">
-              Showing <span className="font-semibold text-gray-200">{data.total}</span> {dataMode === 'live' ? 'real Razorpay' : dataMode === 'synthetic' ? 'synthetic benchmark' : 'total'} cases
+            <span className="text-slate-500">
+              Showing <span className="font-bold text-slate-900">{data.total}</span> {dataMode === 'live' ? 'live Razorpay' : dataMode === 'synthetic' ? 'benchmark' : 'total'} cases
             </span>
           </div>
         )}
       </div>
 
-      <div>
+      {/* Cases Table */}
+      <div className="overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading cases...</div>
+          <div className="p-12 text-center text-slate-400 font-medium animate-pulse">Loading cases...</div>
         ) : data?.cases.length === 0 ? (
-          <div className="p-12 text-center text-gray-400 space-y-2">
-            <div className="text-3xl">📭</div>
-            <p className="font-medium text-gray-200">No {dataMode === 'live' ? 'Live Razorpay' : ''} cases found.</p>
+          <div className="p-16 text-center text-slate-500 space-y-3">
+            <div className="text-4xl">📭</div>
+            <p className="font-semibold text-slate-700 text-sm">No {dataMode === 'live' ? 'Live Razorpay' : ''} cases found matching your filters.</p>
             {dataMode === 'live' && (
-              <p className="text-xs text-gray-500">
-                Fail a test payment via Razorpay checkout or run <code className="text-blue-400 bg-gray-900 px-1.5 py-0.5 rounded">python -m scripts.live_demo --simulate</code> to generate a live case.
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                Fail a test payment via Razorpay checkout or trigger the webhook simulator to record an authentic live case.
               </p>
             )}
           </div>
         ) : (
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-900 sticky top-0 z-10 border-b border-gray-800 shadow-sm">
+            <thead className="bg-slate-50/80 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200/80">
               <tr>
-                <th className="px-4 py-3 font-medium text-gray-400">Case ID</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Source</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Customer</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Amount</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Type</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Channel</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Outcome</th>
-                <th className="px-4 py-3 font-medium text-gray-400">Recovered</th>
+                <th className="px-5 py-3.5">Case ID</th>
+                <th className="px-5 py-3.5">Data Origin</th>
+                <th className="px-5 py-3.5">Customer</th>
+                <th className="px-5 py-3.5">Amount</th>
+                <th className="px-5 py-3.5">Type</th>
+                <th className="px-5 py-3.5">Channel</th>
+                <th className="px-5 py-3.5">Outcome</th>
+                <th className="px-5 py-3.5">Recovered</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-slate-100">
               {data?.cases.map((c: Case) => {
                 const live = isLiveCase(c.id);
+                const isSelected = selectedCaseId === c.id;
                 return (
                   <tr 
                     key={c.id} 
                     onClick={() => onSelectCase(c.id)}
-                    className={`cursor-pointer hover:bg-gray-800/80 transition-colors ${
-                      selectedCaseId === c.id ? 'bg-gray-800 ring-1 ring-blue-500/50' : ''
-                    } ${live ? 'bg-emerald-950/10' : ''}`}
+                    className={`cursor-pointer transition-colors ${
+                      isSelected 
+                        ? 'bg-indigo-50/80 ring-1 ring-indigo-500/30' 
+                        : live
+                          ? 'bg-emerald-50/20 hover:bg-emerald-50/40'
+                          : 'hover:bg-slate-50/90'
+                    }`}
                   >
-                    <td className="px-4 py-3 font-mono text-xs font-bold text-blue-400">{c.id}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5 font-mono text-xs font-bold text-indigo-600">{c.id}</td>
+                    <td className="px-5 py-3.5">
                       {live ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/60 shadow-xs">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                          LIVE RZP
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100/80 text-emerald-800 border border-emerald-300/80 shadow-2xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          REAL RZP
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-800 text-gray-400 border border-gray-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
                           BENCHMARK
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-200">{c.customer_name}</td>
-                    <td className="px-4 py-3 font-semibold">₹{c.payment_amount.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-gray-400 text-xs uppercase">{c.payment_type}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getChannelBadge(c.assigned_channel)}`}>
+                    <td className="px-5 py-3.5 font-semibold text-slate-800">{c.customer_name}</td>
+                    <td className="px-5 py-3.5 font-bold text-slate-900">₹{c.payment_amount.toLocaleString()}</td>
+                    <td className="px-5 py-3.5 text-slate-500 text-xs uppercase font-medium">{c.payment_type}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getChannelBadge(c.assigned_channel)}`}>
                         {c.assigned_channel || 'pending'}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2.5 py-1 rounded text-xs font-medium ${getOutcomeBadge(c.outcome)}`}>
+                    <td className="px-5 py-3.5">
+                      <span className={`px-2.5 py-1 rounded-md text-xs border ${getOutcomeBadge(c.outcome)}`}>
                         {c.outcome || 'pending'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-green-400 font-semibold">₹{c.amount_recovered.toLocaleString()}</td>
+                    <td className="px-5 py-3.5 text-emerald-600 font-bold">₹{c.amount_recovered.toLocaleString()}</td>
                   </tr>
                 );
               })}
@@ -159,24 +166,25 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
         )}
       </div>
 
-      <div className="p-4 border-t border-gray-800 flex justify-between items-center bg-gray-900 text-sm">
-        <div className="text-gray-400 text-xs">
-          Page {data?.page || 1} | Showing {data?.cases.length || 0} of {data?.total || 0}
+      {/* Pagination Footer */}
+      <div className="p-4 border-t border-slate-200/80 flex justify-between items-center bg-slate-50/50 text-xs">
+        <div className="text-slate-500 font-medium">
+          Page {data?.page || 1} • Showing {data?.cases.length || 0} of {data?.total || 0} cases
         </div>
         <div className="flex gap-2">
           <button 
             disabled={page === 1} 
             onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1 bg-gray-800 rounded border border-gray-700 disabled:opacity-50 hover:bg-gray-700 text-xs"
+            className="px-3.5 py-1.5 bg-white rounded-xl border border-slate-200 shadow-2xs font-semibold text-slate-700 disabled:opacity-40 hover:bg-slate-50 transition"
           >
-            Prev
+            ← Previous
           </button>
           <button 
             disabled={data ? (page * 20 >= data.total) : true}
             onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 bg-gray-800 rounded border border-gray-700 disabled:opacity-50 hover:bg-gray-700 text-xs"
+            className="px-3.5 py-1.5 bg-white rounded-xl border border-slate-200 shadow-2xs font-semibold text-slate-700 disabled:opacity-40 hover:bg-slate-50 transition"
           >
-            Next
+            Next →
           </button>
         </div>
       </div>

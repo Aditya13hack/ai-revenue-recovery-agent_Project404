@@ -57,28 +57,28 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
   };
 
   return (
-    <div className="bg-gray-900/90 border border-blue-900/40 rounded-xl p-4 mb-6 shadow-lg">
+    <div className="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/60 border border-indigo-100 rounded-2xl p-4.5 shadow-xs mb-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></span>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-200">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
             Hinglish Voice Recovery Call
           </h4>
         </div>
-        <span className="text-xs font-mono text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">
+        <span className="text-[11px] font-mono text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded-md border border-indigo-200 font-semibold">
           Edge-TTS Neural Audio (hi-IN)
         </span>
       </div>
 
       {/* Message Transcript */}
       {message && (
-        <div className="mb-3 p-3 bg-gray-950/70 border border-gray-800 rounded-lg">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-900">
+        <div className="mb-3.5 p-3.5 bg-white/90 border border-indigo-100/80 rounded-xl shadow-2xs">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
               AI Agent Script
             </span>
           </div>
-          <p className="text-xs text-gray-300 leading-relaxed italic">
+          <p className="text-xs text-slate-700 leading-relaxed italic">
             "{message}"
           </p>
         </div>
@@ -86,27 +86,27 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
 
       {hasError ? (
         <div className="space-y-2">
-          <div className="text-amber-400/90 text-xs bg-amber-950/40 border border-amber-800/50 p-3 rounded-lg flex items-center justify-between">
+          <div className="text-amber-800 text-xs bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center justify-between shadow-2xs">
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <span>Audio generation delayed. Click retry to load.</span>
             </div>
             <button
               onClick={handleRetry}
-              className="px-2.5 py-1 text-xs bg-amber-900/60 hover:bg-amber-800 text-amber-200 rounded border border-amber-700 transition"
+              className="px-3 py-1 text-xs bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold rounded-lg border border-amber-300 transition"
             >
               Retry
             </button>
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="flex items-center gap-3">
             <button 
               onClick={togglePlay}
-              className="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all shadow-md shadow-blue-600/30 shrink-0"
+              className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-full transition-all shadow-md shadow-indigo-200 shrink-0 hover:scale-105 active:scale-95"
               title={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -132,7 +132,7 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
               controlsList="nodownload"
             />
           </div>
-          <p className="text-[11px] text-gray-400 italic">
+          <p className="text-[11px] text-slate-400 italic">
             * Real-time neural voice synthesis generated from the LLM's custom proposal.
           </p>
         </div>
