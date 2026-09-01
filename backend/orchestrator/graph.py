@@ -178,12 +178,20 @@ def execute_node(state: RecoveryState) -> RecoveryState:
     session = state.get("_session")
     logger: AuditLogger | None = state.get("_logger")
     budget_tracker: BudgetTracker = state.get("_budget_tracker")
-    decision = state["control_plane_decision"]
-
-    action = decision.modified_proposal if decision.modified_proposal else decision.original_proposal
+    decision = state.get("control_plane_decision")
     case = session.query(Case).filter(Case.id == state["case_id"]).first()
     ctx = state["case_context"]
 
+    # Handle Silent Retry path directly from Triage
+    if decision is None:
+        case.payment_retries += 1
+        state["amount_recovered"] = ctx.payment_amount
+        action_details = {"action_type": "silent_retry", "decision": "execute"}
+        if logger:
+            logger.log_execution(state["case_id"], action_details)
+        return state
+
+    action = decision.modified_proposal if decision.modified_proposal else decision.original_proposal
     action_details = {"action_type": action.action_type.value, "decision": decision.decision.value}
 
     if action.action_type == ActionType.OFFER_DISCOUNT:

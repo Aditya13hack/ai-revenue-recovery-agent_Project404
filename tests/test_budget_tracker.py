@@ -1,15 +1,13 @@
 import pytest
 import threading
-from backend.database.connection import init_db, get_db, drop_db
+from backend.database.connection import init_db, get_db
 from backend.control_plane.budget_tracker import BudgetTracker
 from backend.database.models import CampaignBudget, BudgetTransaction
 
 @pytest.fixture(autouse=True)
 def setup_teardown_db():
-    drop_db()
     init_db()
     yield
-    drop_db()
 
 def test_consume_reduces_balance():
     tracker = BudgetTracker(total_budget=1000.0)

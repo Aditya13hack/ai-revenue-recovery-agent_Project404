@@ -48,10 +48,10 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
       id: 'reason',
       name: '4. Reason Node',
       type: 'LLM Reasoning',
-      badge: 'Groq Llama/Qwen',
+      badge: 'Groq LLM',
       color: 'border-amber-300 bg-amber-50/70 text-amber-900',
       glow: 'shadow-amber-500/10 ring-4 ring-amber-100',
-      description: 'Groq Compound LLM analyzes customer profile and formulates a structured Hinglish action proposal (discount, extension, retry date).',
+      description: 'Groq LLM analyzes customer profile and formulates a structured Hinglish action proposal (discount, extension, retry date).',
       inputs: 'CaseContext + Conversation History',
       outputs: 'ActionProposal (structured JSON)',
     },
@@ -109,88 +109,92 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-200/80 rounded-3xl w-full max-w-6xl shadow-2xl overflow-hidden my-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-6xl shadow-2xl overflow-hidden my-auto">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-200">
-              ⚡
+        <div className="p-5 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="text-lg font-bold text-slate-900">LangGraph Orchestration Pipeline</h2>
-                <span className="text-xs font-semibold px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">
-                  Compiled StateGraph v0.2
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-slate-900">LangGraph Orchestration Pipeline</h2>
+                <span className="text-[11px] font-medium px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">
+                  StateGraph v0.2
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Deterministic Control Loop: Detect → Diagnose → Triage → LLM Reason → Policy Validate → Execute → Measure
+                Deterministic Execution Loop: Detect → Diagnose → Triage → LLM Reason → Policy Validate → Execute → Measure
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition"
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition"
           >
-            ✕
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Path Filter Tabs */}
-        <div className="px-6 py-3 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center gap-2">
+        <div className="px-5 py-2.5 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">
             Execution Pathway:
           </span>
           <button
             onClick={() => setSelectedPath('all')}
-            className={`px-3.5 py-1.5 text-xs rounded-xl font-semibold transition ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition ${
               selectedPath === 'all'
-                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200'
+                ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🌐 Complete Topology
+            Complete Topology
           </button>
           <button
             onClick={() => setSelectedPath('happy')}
-            className={`px-3.5 py-1.5 text-xs rounded-xl font-semibold transition ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition ${
               selectedPath === 'happy'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-200'
+                ? 'bg-emerald-600 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🟢 Standard Voice/SMS Recovery
+            Standard Recovery Flow
           </button>
           <button
             onClick={() => setSelectedPath('silent')}
-            className={`px-3.5 py-1.5 text-xs rounded-xl font-semibold transition ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition ${
               selectedPath === 'silent'
-                ? 'bg-cyan-600 text-white shadow-sm shadow-cyan-200'
+                ? 'bg-cyan-600 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🔄 Silent Retry (Bypasses LLM)
+            Silent Retry (Automated)
           </button>
           <button
             onClick={() => setSelectedPath('blocked')}
-            className={`px-3.5 py-1.5 text-xs rounded-xl font-semibold transition ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition ${
               selectedPath === 'blocked'
-                ? 'bg-amber-600 text-white shadow-sm shadow-amber-200'
+                ? 'bg-amber-600 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🛡️ Control Plane Blocked / Capped
+            Policy Guardrail Blocked / Capped
           </button>
           <button
             onClick={() => setSelectedPath('escalate')}
-            className={`px-3.5 py-1.5 text-xs rounded-xl font-semibold transition ${
+            className={`px-3 py-1.5 text-xs rounded-lg font-semibold transition ${
               selectedPath === 'escalate'
-                ? 'bg-rose-600 text-white shadow-sm shadow-rose-200'
+                ? 'bg-rose-600 text-white shadow-xs'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
             }`}
           >
-            🚨 Human Escalation (Prior Refusal)
+            Human Escalation Flow
           </button>
         </div>
 
@@ -199,7 +203,7 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
           <div className="min-w-[900px] flex items-center justify-between relative py-6">
             
             {/* Connecting Background Line */}
-            <div className="absolute top-1/2 left-6 right-6 h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
+            <div className="absolute top-1/2 left-6 right-6 h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
 
             {/* Nodes */}
             {nodes.map((node) => {
@@ -210,29 +214,29 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
                 <div 
                   key={node.id}
                   onClick={() => setActiveNode(node.id)}
-                  className={`relative z-10 flex flex-col items-center cursor-pointer transition-all duration-300 ${
+                  className={`relative z-10 flex flex-col items-center cursor-pointer transition-all duration-200 ${
                     active ? 'opacity-100 scale-100' : 'opacity-30 grayscale scale-95'
                   }`}
                 >
                   <div 
-                    className={`w-28 h-28 rounded-2xl border-2 flex flex-col items-center justify-center p-3 text-center transition-all ${
+                    className={`w-28 h-28 rounded-xl border flex flex-col items-center justify-center p-3 text-center transition-all ${
                       node.color
-                    } ${isSelected ? 'scale-105 ' + node.glow : 'hover:scale-105 shadow-xs'}`}
+                    } ${isSelected ? 'scale-105 ' + node.glow : 'hover:scale-105 shadow-2xs'}`}
                   >
                     <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">
                       {node.type}
                     </span>
-                    <h4 className="text-xs font-black mt-1 text-slate-900">
+                    <h4 className="text-xs font-bold mt-1 text-slate-900">
                       {node.name.split('.')[1]}
                     </h4>
-                    <span className="text-[9px] font-mono mt-1 px-1.5 py-0.5 bg-white/80 border border-black/5 rounded font-medium">
+                    <span className="text-[9px] font-mono mt-1 px-1.5 py-0.5 bg-white border border-slate-200 rounded font-medium">
                       {node.badge}
                     </span>
                   </div>
 
-                  {/* Pulsing indicator */}
+                  {/* Indicator */}
                   {active && (
-                    <span className="w-2 h-2 rounded-full bg-indigo-500 mt-2.5 animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></span>
                   )}
                 </div>
               );
@@ -242,7 +246,7 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
 
         {/* Selected Node Details Drawer */}
         {activeNode && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
+          <div className="px-5 py-4 bg-slate-50 border-t border-slate-200">
             {(() => {
               const n = nodes.find((x) => x.id === activeNode)!;
               return (
@@ -250,7 +254,7 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
                   <div className="md:col-span-2">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-bold text-slate-900">{n.name}</span>
-                      <span className="text-xs font-mono font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                      <span className="text-xs font-mono font-semibold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
                         {n.type}
                       </span>
                     </div>
@@ -258,7 +262,7 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
                       {n.description}
                     </p>
                   </div>
-                  <div className="text-xs space-y-1.5 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                  <div className="text-xs space-y-1.5 bg-white p-3 rounded-lg border border-slate-200 shadow-2xs">
                     <div>
                       <span className="text-slate-400 font-bold uppercase text-[10px]">Inputs: </span>
                       <p className="text-slate-700 font-mono text-[11px] mt-0.5">{n.inputs}</p>
@@ -275,13 +279,13 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
         )}
 
         {/* Footer */}
-        <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
-          <span>💡 Click any node above to inspect its inputs, outputs, and internal logic.</span>
+        <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
+          <span>Click any node to inspect inputs, outputs, and internal logic.</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition shadow-xs"
+            className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold transition"
           >
-            Close Diagram
+            Close
           </button>
         </div>
 

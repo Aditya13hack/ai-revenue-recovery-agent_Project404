@@ -4,14 +4,12 @@ from backend.reasoning.schemas import ActionProposal, ActionType, DecisionType
 from backend.control_plane.rules_config import MerchantPolicyConfig
 from backend.control_plane.policy_engine import validate_action
 from backend.control_plane.budget_tracker import BudgetTracker
-from backend.database.connection import init_db, drop_db
+from backend.database.connection import init_db
 
 @pytest.fixture(autouse=True)
 def setup_teardown_db():
-    drop_db()
     init_db()
     yield
-    drop_db()
 
 @pytest.fixture
 def config():
