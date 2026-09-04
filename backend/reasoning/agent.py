@@ -37,7 +37,8 @@ def clean_proposal_dict(data: dict) -> dict:
     if not isinstance(data, dict):
         raise ValueError("Expected dict from JSON parsing")
 
-    # Clean action_type
+
+
     act = str(data.get("action_type", "")).lower().strip().replace(" ", "_").replace("-", "_")
     valid_actions = [e.value for e in ActionType]
     if act not in valid_actions:
@@ -49,7 +50,8 @@ def clean_proposal_dict(data: dict) -> dict:
             act = ActionType.REQUEST_RETRY.value
     data["action_type"] = act
 
-    # Clean discount_pct
+
+
     disc = data.get("discount_pct")
     if disc in ("", None, "null"):
         data["discount_pct"] = None
@@ -60,7 +62,8 @@ def clean_proposal_dict(data: dict) -> dict:
         except (ValueError, TypeError):
             data["discount_pct"] = None
 
-    # Clean extension_days
+
+
     ext = data.get("extension_days")
     if ext in ("", None, "null"):
         data["extension_days"] = None
@@ -71,7 +74,8 @@ def clean_proposal_dict(data: dict) -> dict:
         except (ValueError, TypeError):
             data["extension_days"] = None
 
-    # Clean promise_date
+
+
     prom = data.get("promise_date")
     if prom in ("", None, "null"):
         data["promise_date"] = None
@@ -130,7 +134,8 @@ class ReasoningAgent:
             response = self.llm.invoke(messages)
             raw = response.content.strip()
 
-            # Strip markdown code fences if present
+
+
             if raw.startswith("```"):
                 raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
                 if raw.endswith("```"):

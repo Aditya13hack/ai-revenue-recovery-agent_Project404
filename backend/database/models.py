@@ -17,12 +17,10 @@ from datetime import datetime
 
 
 class Base(DeclarativeBase):
-    """Base class for all ORM models."""
     pass
 
 
 class Case(Base):
-    """A single failed-payment recovery case."""
     __tablename__ = "cases"
 
     id = Column(String, primary_key=True)
@@ -66,11 +64,6 @@ class Case(Base):
 
 
 class ActionProposal(Base):
-    """
-    Every action the LLM proposed, together with the control plane's
-    decision on that proposal.  One case can have multiple proposals
-    (e.g. the AI tries a discount, gets MODIFY'd, then tries an extension).
-    """
     __tablename__ = "action_proposals"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

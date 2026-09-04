@@ -37,7 +37,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
 
   return (
     <div className="space-y-5">
-      {/* Headline Banner */}
+
       <div className="bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 p-6 rounded-xl border border-slate-200/80 shadow-xs text-center relative overflow-hidden">
         <div className="flex items-center justify-center gap-2 mb-2">
           {dataMode === 'live' ? (
@@ -67,9 +67,9 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
         </h2>
       </div>
 
-      {/* Hero Metric Cards */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Revenue at Risk */}
+
         <div className="bg-white rounded-xl p-5 shadow-xs border border-slate-200 hover:border-slate-300 transition-all">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Revenue at Risk</h3>
@@ -84,7 +84,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
           </div>
         </div>
 
-        {/* Net Revenue Recovered */}
+
         <div className="bg-white rounded-xl p-5 shadow-xs border border-slate-200 hover:border-slate-300 transition-all">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Net Recovered</h3>
@@ -101,7 +101,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
           </div>
         </div>
 
-        {/* Recovery Rate */}
+
         <div className="bg-white rounded-xl p-5 shadow-xs border border-slate-200 hover:border-slate-300 transition-all">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-wider">Recovery Rate</h3>
@@ -120,7 +120,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
           </div>
         </div>
 
-        {/* Control Plane Guardrails */}
+
         <div className="bg-white rounded-xl p-5 shadow-xs border border-slate-200 hover:border-slate-300 transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2.5">
@@ -147,7 +147,7 @@ export default function MetricsPanel({ dataMode }: MetricsPanelProps) {
         </div>
       </div>
 
-      {/* Budget Gauge */}
+
       {budget && <BudgetGauge budget={budget} />}
     </div>
   );

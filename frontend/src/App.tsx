@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div className="min-h-screen font-sans text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
-      {/* Top Navigation Bar */}
+
       <header className="bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-3.5 sticky top-0 z-30 shadow-xs transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3.5">
@@ -63,9 +63,9 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content Area */}
+
       <main className="max-w-7xl w-full mx-auto p-6 space-y-6">
-        {/* Mode Switcher Bar */}
+
         <div className="bg-white p-2 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg border border-slate-200/60">
             <button
@@ -120,12 +120,12 @@ function App() {
           </div>
         </div>
 
-        {/* Top Metrics Row */}
+
         <section>
           <MetricsPanel dataMode={dataMode} />
         </section>
 
-        {/* Case Explorer Section */}
+
         <section className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
           <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
             <div>
@@ -145,7 +145,7 @@ function App() {
         </section>
       </main>
 
-      {/* Slide-over Case Detail Modal */}
+
       {selectedCaseId && (
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-xs transition-opacity animate-fade-in">
           <div className="w-full max-w-xl bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col">
@@ -157,12 +157,12 @@ function App() {
         </div>
       )}
 
-      {/* Interactive LangGraph Architecture Visualizer Modal */}
+
       {showGraph && (
         <GraphVisualizer onClose={() => setShowGraph(false)} />
       )}
 
-      {/* Interactive Policy Sandbox & Guardrail Simulator Modal */}
+
       {showSandbox && (
         <PolicySandbox onClose={() => setShowSandbox(false)} />
       )}

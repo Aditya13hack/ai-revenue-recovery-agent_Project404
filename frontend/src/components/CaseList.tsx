@@ -50,7 +50,7 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
 
   return (
     <div className="bg-white text-slate-800">
-      {/* Filters Toolbar */}
+
       <div className="p-3.5 border-b border-slate-200 flex flex-wrap gap-4 bg-slate-50/50 items-center justify-between">
         <div className="flex flex-wrap gap-2.5 items-center">
           <select 
@@ -87,7 +87,7 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
         )}
       </div>
 
-      {/* Cases Table */}
+
       <div className="overflow-x-auto">
         {loading ? (
           <div className="p-12 text-center text-slate-400 font-medium animate-pulse">Loading cases...</div>
@@ -168,7 +168,7 @@ export default function CaseList({ onSelectCase, selectedCaseId, dataMode }: Cas
         )}
       </div>
 
-      {/* Pagination Footer */}
+
       <div className="p-3.5 border-t border-slate-200 flex justify-between items-center bg-slate-50/50 text-xs">
         <div className="text-slate-500 font-medium">
           Page {data?.page || 1} • Showing {data?.cases.length || 0} of {data?.total || 0} cases

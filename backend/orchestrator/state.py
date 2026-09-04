@@ -5,8 +5,6 @@ from backend.reasoning.schemas import (
 
 
 class RecoveryState(TypedDict, total=False):
-    """State object flowing through the LangGraph recovery pipeline."""
-    # Core data
     case_id: str
     case_context: Optional[CaseContext]
     triage_result: Optional[TriageResult]

@@ -4,11 +4,16 @@ from backend.reasoning.schemas import ActionProposal, ActionType, DecisionType
 from backend.control_plane.rules_config import MerchantPolicyConfig
 from backend.control_plane.policy_engine import validate_action
 from backend.control_plane.budget_tracker import BudgetTracker
-from backend.database.connection import init_db
+from backend.database.connection import init_db, get_db
 
 @pytest.fixture(autouse=True)
 def setup_teardown_db():
     init_db()
+    with get_db() as db:
+        from backend.database.models import BudgetTransaction, CampaignBudget
+        db.query(BudgetTransaction).delete()
+        db.query(CampaignBudget).delete()
+        db.commit()
     yield
 
 @pytest.fixture

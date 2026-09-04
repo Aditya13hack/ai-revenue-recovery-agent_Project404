@@ -1,12 +1,8 @@
 """
-Policy Engine — the core deterministic control plane.
+Policy Engine — validates every LLM proposal before execution.
 
-Every proposed action from the LLM reasoning layer passes through here
-before execution. This module is the heart of the project's differentiator:
-the AI proposes, the control plane decides.
-
-This is NOT an AI model. It is pure, deterministic Python logic — and that
-distinction is what makes the system auditable and explainable.
+Every proposed action from the reasoning layer passes through here.
+Pure deterministic Python logic, no AI involved.
 """
 
 from backend.reasoning.schemas import ActionProposal, ControlPlaneDecision, ActionType, DecisionType

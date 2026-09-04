@@ -11,7 +11,6 @@ import time
 import argparse
 from pathlib import Path
 
-# Ensure project root is on path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from backend.database.connection import init_db, get_db
@@ -24,11 +23,9 @@ from backend.config import CAMPAIGN_BUDGET
 
 
 def run_batch(limit=None):
-    """Run the full recovery pipeline on cases."""
     print("\n[START] AI Revenue Recovery Agent - Batch Run", flush=True)
     print("=" * 60, flush=True)
 
-    # Initialize
     config = MerchantPolicyConfig.from_config()
     budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
 
@@ -90,7 +87,6 @@ def run_batch(limit=None):
     print("-" * 60, flush=True)
     print(f"[TIME] Batch completed in {elapsed:.1f}s ({successes} success, {failures} failures)", flush=True)
 
-    # Compute and display metrics
     with get_db() as session:
         metrics = compute_batch_metrics(session)
     print_metrics(metrics)

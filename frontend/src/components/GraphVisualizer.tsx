@@ -111,7 +111,8 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-6xl shadow-2xl overflow-hidden my-auto">
         
-        {/* Header */}
+
+
         <div className="p-5 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
@@ -141,7 +142,8 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
           </button>
         </div>
 
-        {/* Path Filter Tabs */}
+
+
         <div className="px-5 py-2.5 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">
             Execution Pathway:
@@ -198,14 +200,17 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
           </button>
         </div>
 
-        {/* Visual Graph Area */}
+
+
         <div className="p-8 overflow-x-auto bg-slate-50/40">
           <div className="min-w-[900px] flex items-center justify-between relative py-6">
             
-            {/* Connecting Background Line */}
+
+
             <div className="absolute top-1/2 left-6 right-6 h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
 
-            {/* Nodes */}
+
+
             {nodes.map((node) => {
               const active = isNodeActive(node.id);
               const isSelected = activeNode === node.id;
@@ -234,7 +239,8 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
                     </span>
                   </div>
 
-                  {/* Indicator */}
+
+
                   {active && (
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-2"></span>
                   )}
@@ -244,7 +250,8 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
           </div>
         </div>
 
-        {/* Selected Node Details Drawer */}
+
+
         {activeNode && (
           <div className="px-5 py-4 bg-slate-50 border-t border-slate-200">
             {(() => {
@@ -278,7 +285,8 @@ export default function GraphVisualizer({ onClose }: GraphVisualizerProps) {
           </div>
         )}
 
-        {/* Footer */}
+
+
         <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
           <span>Click any node to inspect inputs, outputs, and internal logic.</span>
           <button

@@ -15,7 +15,7 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
     setIsPlaying(false);
     setMessage(null);
 
-    // Fetch the transcript message
+
     fetch(`/api/cases/${caseId}/message`)
       .then((res) => res.json())
       .then((data) => {
@@ -70,7 +70,7 @@ export default function VoicePlayer({ caseId }: VoicePlayerProps) {
         </span>
       </div>
 
-      {/* Message Transcript */}
+
       {message && (
         <div className="mb-3.5 p-3.5 bg-white/90 border border-indigo-100/80 rounded-xl shadow-2xs">
           <div className="flex items-center gap-1.5 mb-1.5">

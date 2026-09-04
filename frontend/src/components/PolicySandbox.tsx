@@ -131,7 +131,8 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
       <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden my-auto">
         
-        {/* Header */}
+
+
         <div className="p-5 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold">
@@ -161,7 +162,8 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
           </button>
         </div>
 
-        {/* Presets Bar */}
+
+
         <div className="px-5 py-2.5 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center gap-2">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2">
             Select Test Scenario:
@@ -184,7 +186,8 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
           })}
         </div>
 
-        {/* Interactive Input Form */}
+
+
         <div className="p-5 border-b border-slate-200 bg-white">
           <div className="space-y-3">
             <div>
@@ -241,12 +244,14 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
           </div>
         </div>
 
-        {/* Results Area */}
+
+
         {result && (
           <div className="p-5 bg-slate-50/50 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              {/* Left Column: LLM Raw Proposal */}
+
+
               <div className="bg-white p-4.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -292,7 +297,8 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
                 </div>
               </div>
 
-              {/* Right Column: Control Plane Decision */}
+
+
               <div className="bg-white p-4.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
@@ -351,7 +357,8 @@ export default function PolicySandbox({ onClose }: PolicySandboxProps) {
           </div>
         )}
 
-        {/* Footer */}
+
+
         <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
           <span>The Control Plane ensures that no LLM hallucination or customer exploit triggers an unapproved financial action.</span>
           <button

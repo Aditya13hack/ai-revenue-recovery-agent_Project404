@@ -33,12 +33,12 @@ def init_db() -> None:
 
 
 def drop_db() -> None:
-    """Drop all database tables (use with caution)."""
+    """Drop all database tables."""
     Base.metadata.drop_all(bind=engine)
 
 
 def reset_db() -> None:
-    """Drop and recreate all tables — useful for re-running the batch."""
+    """Drop and recreate all tables."""
     drop_db()
     init_db()
 

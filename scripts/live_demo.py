@@ -41,7 +41,6 @@ def print_header():
 
 
 def step_verify():
-    """Step 1: Verify Razorpay connection."""
     print("\n[STEP 1] Verifying Razorpay API connection (may take a few seconds)...", flush=True)
     result = verify_connection()
 
@@ -57,7 +56,6 @@ def step_verify():
 
 
 def step_create_order(amount=5000, customer_name="Aarav Sharma"):
-    """Step 2: Create a real Razorpay order + payment link."""
     print(f"\n[STEP 2] Creating Razorpay order (Rs.{amount:,.0f} for {customer_name})...", flush=True)
 
     receipt = f"DEMO-{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -98,7 +96,6 @@ def step_create_order(amount=5000, customer_name="Aarav Sharma"):
 
 
 def step_simulate_webhook(amount=5000, customer_name="Aarav Sharma", failure_reason="insufficient_balance"):
-    """Step 3: Simulate a payment.failed webhook and process through AI pipeline."""
     print(f"\n[STEP 3] Simulating payment.failed webhook...", flush=True)
     print(f"  Customer: {customer_name}", flush=True)
     print(f"  Amount:   Rs.{amount:,.0f}", flush=True)
@@ -194,7 +191,6 @@ def step_simulate_webhook(amount=5000, customer_name="Aarav Sharma", failure_rea
 def run_demo(verify_only=False, create_order=False, simulate=False, full=False):
     print_header()
 
-    # Always verify first
     connected = step_verify()
     if not connected:
         print("\n[!] Fix your Razorpay keys in .env and try again.", flush=True)

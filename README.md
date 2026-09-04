@@ -1,210 +1,187 @@
-# ⚡ AI Revenue Recovery Agent
-### Razorpay AI Buildathon 2026 | Track 03: Autonomous Revenue Recovery
+# AI Revenue Recovery Agent
 
-> **"AI proposes. Control Plane decides. System executes."**  
-> An enterprise-grade, bounded autonomous agent for recovering failed recurring payments (UPI Autopay, EMIs, and Subscriptions) with an uncompromising **Deterministic Policy Engine**, real-time **Razorpay Webhook Integration**, and natural **Hinglish Neural Voice Calls**.
+**Razorpay AI Buildathon 2026 — Track 03**
 
----
+> AI proposes. Control Plane decides. System executes.
 
-## 🎯 Executive Summary & Problem Statement
-
-In India's rapidly expanding digital payment ecosystem, recurring payments (UPI Autopay mandates, loan EMIs, SaaS subscriptions) suffer from an **involuntary failure rate of 12% to 20%**. 
-
-### The Industry Dilemma:
-1. **Generic Dunning Emails & SMS**: Have abysmal conversion (<4%), as customers ignore generic payment links.
-2. **Human Calling Centers**: Are expensive, slow to respond, and fail to scale for low-to-medium ticket transactions.
-3. **Unconstrained AI Chatbots / Voice Bots**: Are catastrophic for finance—LLMs **hallucinate**, offer rogue discounts, violate compliance (e.g. asking for OTPs/CVVs), and spam customers into regulatory Do-Not-Contact (DNC) violations.
-
-### Our Solution:
-The **AI Revenue Recovery Agent** bridges this gap. It pairs the natural reasoning and multilingual conversational capabilities of LLMs (**Groq Compound Llama 3.1 / Qwen**) with an isolated, zero-trust **Deterministic Control Plane** written in pure Python. Every single action proposed by the AI must pass through **8 hard stopping rules** before any API call or communication is triggered.
+An autonomous agent that recovers failed recurring payments (UPI Autopay, EMIs, Subscriptions) using LLM reasoning, real Razorpay APIs, and Hinglish voice calls — while keeping the AI strictly bounded by a deterministic policy engine.
 
 ---
 
-## 🏛️ System Architecture: Separation of Powers
+## Screenshots
 
-```
-                                  ┌──────────────────────────────┐
-                                  │   Razorpay Webhook Event     │
-                                  │   (payment.failed on rzp.io) │
-                                  └──────────────┬───────────────┘
-                                                 │
-                                                 ▼
-                                  ┌──────────────────────────────┐
-                                  │     1. Detection & Triage    │
-                                  │ (Channel Routing: Voice/SMS) │
-                                  └──────────────┬───────────────┘
-                                                 │
-                                                 ▼
-                                  ┌──────────────────────────────┐
-                                  │  2. LLM Reasoning Layer      │
-                                  │ (Groq Llama 3.1 in Hinglish) │
-                                  └──────────────┬───────────────┘
-                                                 │
-                                                 ▼
-             ┌────────────────────────────────────────────────────────────────────────┐
-             │                 3. DETERMINISTIC CONTROL PLANE (Pure Python)           │
-             │                                                                        │
-             │   [Rule 1] Do-Not-Contact Check ────────────────────────► [ BLOCK ]    │
-             │   [Rule 2] Anti-Phishing / OTP Check ───────────────────► [ BLOCK ]    │
-             │   [Rule 3] Contact Attempt Ceiling (<= 3) ──────────────► [ BLOCK ]    │
-             │   [Rule 4] Consecutive Refusal Threshold (<= 2) ────────► [ ESCALATE ] │
-             │   [Rule 5] Payment Retry Limits (<= 2) ─────────────────► [ BLOCK ]    │
-             │   [Rule 6] Extension Days Cap (Max 7 Days) ─────────────► [ MODIFY ]   │
-             │   [Rule 7] Discount Percentage Cap (Max 15%) ───────────► [ MODIFY ]   │
-             │   [Rule 8] Campaign Incentive Budget Cap (Rs.50k) ──────► [ CAPPED ]   │
-             └───────────────────────────────────┬────────────────────────────────────┘
-                                                 │
-                                                 ▼
-                                  ┌──────────────────────────────┐
-                                  │    4. Safe Action Execution  │
-                                  │ (Edge-TTS Audio + Razorpay)  │
-                                  └──────────────┬───────────────┘
-                                                 │
-                                                 ▼
-                                  ┌──────────────────────────────┐
-                                  │    5. Cryptographic Audit    │
-                                  │ (Immutable SQLite Timeline)  │
-                                  └──────────────────────────────┘
-```
+| Dashboard & Metrics | Policy Sandbox | Case Detail & Audit |
+|:---:|:---:|:---:|
+| ![Dashboard](docs/dashboard.png) | ![Sandbox](docs/sandbox.png) | ![Case Detail](docs/case_detail.png) |
 
 ---
 
-## 🛡️ The 8 Hard Stopping Rules (Policy Engine)
+## The Problem
 
-The Control Plane enforces a strict priority waterfall. No AI proposal can bypass these bounds:
+Recurring payments in India — UPI Autopay mandates, loan EMIs, SaaS subscriptions — fail at a rate of 12-20%. Most of these are involuntary: insufficient balance, bank timeouts, expired cards. The customer intends to pay, but the payment just fails silently.
 
-| # | Guardrail Rule | Target Risk | Deterministic Policy Action | Concrete Example |
-|---|---|---|---|---|
-| **1** | `check_do_not_contact` | Regulatory compliance & harassment | **BLOCK** immediately | Customer says "Don't call me" $\rightarrow$ Communication permanently halted. |
-| **2** | `check_sensitive_data` | Anti-phishing & credential theft | **BLOCK** immediately | AI asks for OTP/CVV/Password $\rightarrow$ Immediately terminated and flagged. |
-| **3** | `check_max_contacts` | Customer spam prevention | **BLOCK** | Maximum 3 contact attempts per billing cycle. |
-| **4** | `check_consecutive_refusals` | Negative sentiment fatigue | **ESCALATE** to Human | 2 consecutive refusals $\rightarrow$ Routed directly to human recovery officer. |
-| **5** | `check_max_retries` | Bank penalty fees | **BLOCK** | Maximum 2 automated retry calls before halting. |
-| **6** | `check_max_extension` | Cashflow delay exploitation | **MODIFY** (Cap to $\le$ 7 Days) | Customer demands 20 days grace $\rightarrow$ Capped strictly at 7 days. |
-| **7** | `check_max_discount` | Margin erosion & rogue discounts | **MODIFY** (Cap to $\le$ 15%) | Customer demands 40% discount $\rightarrow$ Capped strictly at 15%. |
-| **8** | `check_budget_exhaustion` | Merchant campaign overspending | **MODIFY / BLOCK** | Campaign budget remaining $< 5\%$ $\rightarrow$ Zero-discount policy enforced. |
+Current recovery approaches:
+- **Generic emails/SMS** — under 4% conversion. Customers ignore them.
+- **Human call centers** — expensive, slow, don't scale for small transactions.
+- **Raw AI agents** — dangerous in finance. LLMs hallucinate, offer rogue discounts, ask for OTPs, violate DNC regulations.
+
+This project solves the gap: intelligent, personalized, multilingual recovery that's safe enough to deploy without human supervision.
 
 ---
 
-## ⚡ LangGraph 7-Stage StateGraph Workflow
+## How It Works
 
-The entire recovery lifecycle is orchestrated via **LangGraph**:
+### The Core Idea
+
+Letting an LLM loose on financial decisions is dangerous. So the system separates the "thinking" from the "doing":
+1. The **LLM proposes** a recovery strategy (discount, extension, retry, voice call script)
+2. A **pure-Python Control Plane** with 8 hard rules validates it
+3. Only then does anything actually happen
+
+The AI is creative and conversational. But it can never cross a merchant-defined boundary.
+
+### Pipeline (LangGraph StateGraph)
 
 ```mermaid
 graph TD
-    START([Start: Failed Payment Event]) --> Detect["1. Detect Node<br/><i>Ingest Payload into CaseContext</i>"]
-    Detect --> Diagnose["2. Diagnose Node<br/><i>Root-Cause & Risk Scoring</i>"]
-    Diagnose --> Triage{"3. Triage Node<br/><i>Channel Routing</i>"}
+    START([Failed Payment Event]) --> Detect["1. Detect<br/><i>Ingest payment failure</i>"]
+    Detect --> Diagnose["2. Diagnose<br/><i>Root-cause & risk scoring</i>"]
+    Diagnose --> Triage{"3. Triage<br/><i>Channel routing</i>"}
 
-    %% Triage Branching
-    Triage -- "Bank Timeout (Transient)" --> Execute["6. Execute Node<br/><i>Automated Silent Retry</i>"]
-    Triage -- "Prior Refusal / DNC" --> Measure["7. Measure Node<br/><i>Immediate Human Escalation</i>"]
-    Triage -- "Voice / SMS Routing" --> Reason["4. Reason Node (Groq LLM)<br/><i>Formulate Hinglish Proposal</i>"]
+    Triage -- "Bank Timeout" --> Execute["6. Execute<br/><i>Silent auto-retry</i>"]
+    Triage -- "Prior Refusal / DNC" --> Measure["7. Measure<br/><i>Human escalation</i>"]
+    Triage -- "Voice / SMS" --> Reason["4. Reason<br/><i>Groq LLM — Hinglish proposal</i>"]
 
-    %% Reasoning to Control Plane
-    Reason --> Validate{"5. Validate Node<br/><i>8 Deterministic Stopping Rules</i>"}
+    Reason --> Validate{"5. Validate<br/><i>8 Stopping Rules</i>"}
 
-    %% Control Plane Branching
     Validate -- "EXECUTE / MODIFY" --> Execute
     Validate -- "BLOCK / ESCALATE" --> Measure
 
     Execute --> Measure
-    Measure --> END([End: Audit Timeline & Metrics Saved])
+    Measure --> END([Audit Logged & Metrics Saved])
 
-    %% Styling
-    classDef nodeStyle fill:#f8fafc,stroke:#6366f1,stroke-width:2px,color:#0f172a;
-    classDef decisionStyle fill:#eef2ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b;
-    classDef startEnd fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#064e3b;
+    classDef default fill:#f8fafc,stroke:#6366f1,stroke-width:2px,color:#0f172a;
+    classDef decision fill:#eef2ff,stroke:#4f46e5,stroke-width:2px,color:#1e1b4b;
+    classDef endpoint fill:#ecfdf5,stroke:#10b981,stroke-width:2px,color:#064e3b;
 
-    class START,END startEnd;
-    class Detect,Diagnose,Reason,Execute,Measure nodeStyle;
-    class Triage,Validate decisionStyle;
+    class START,END endpoint;
+    class Triage,Validate decision;
 ```
 
----
+### Triage Routing
 
-## 💳 Real Razorpay API Integration (Live Mode)
+Not every failed payment needs the same treatment:
+- **Bank timeout** → Silent auto-retry (no customer contact)
+- **High-value EMI** → Personalized Hinglish voice call
+- **Low-value UPI** → SMS nudge
+- **Customer refused twice** → Skip AI, escalate to human
 
-This project integrates with **official Razorpay APIs** in test/sandbox mode:
-- **SDK Wrapper (`backend/razorpay_client.py`)**: Authenticates via `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET` with exponential backoff.
-- **Hosted Payment Pages (`https://rzp.io`)**: Generates authentic Razorpay payment links for customer retries.
-- **Webhook Ingestion (`POST /api/webhook/razorpay`)**: Receives real `payment.failed` webhook payloads triggered on Razorpay's checkout infrastructure.
-- **Tunneling via ngrok**: Exposes the local FastAPI endpoint to receive live webhook payloads from Razorpay's cloud servers.
+### The 8 Stopping Rules (Control Plane)
 
----
+Every LLM proposal must clear these rules in strict waterfall order. They're pure Python — no LLM, no prompt engineering. They cannot be jailbroken.
 
-## 🗣️ Natural Hinglish Multimodal Voice Engine
-
-To maximize recovery across diverse Indian demographics, the agent reasons and communicates in **balanced Hinglish**:
-- **Tailored Contexts**: Recognizes nuances in UPI Autopay failures, EMI default penalties, and debit card mandate expirations.
-- **Dynamic Neural Speech Synthesis**: Integrates `edge-tts` (`hi-IN-MadhurNeural`) to convert custom LLM dialogue into natural human voice audio on-the-fly.
-- **Live Script Inspector**: Real-time transcript viewer in the frontend dashboard displaying the exact dialogue spoken by the agent.
-
----
-
-## 📊 Interactive Dashboard & Live Sandbox
-
-The dashboard features a **soft, modern light theme with pastel color fusion**:
-
-1. **Live vs. Benchmark Mode Switcher**:
-   - **🌐 All Cases**: Combined portfolio overview.
-   - **🟢 Live Razorpay**: Displays *only* authentic webhook transactions (`RZP-*`).
-   - **📊 Synthetic Benchmark**: Evaluates 200 diverse synthetic cases across all failure tiers.
-2. **Interactive Policy Sandbox Widget**:
-   - Allows judges to type adversarial prompts (e.g. demanding 50% discount or requesting OTPs) and watch the Control Plane intercept, block, or modify the action live.
-3. **LangGraph Pipeline Visualizer**:
-   - Interactive modal simulating different execution pathways (Silent Retry, Guardrail Block, Human Escalation).
-4. **Full Audit Trail & Ledger**:
-   - Minute-by-minute timeline with input/output payloads and merchant incentive budget deductions.
+| Rule | What It Checks | Action |
+|---|---|---|
+| 1. DNC Check | Customer on Do-Not-Contact list | **BLOCK** — no communication |
+| 2. Sensitive Data | AI requesting OTP/CVV/passwords | **BLOCK** — kill the message |
+| 3. Contact Limit | Already contacted 3+ times this cycle | **BLOCK** — stop outreach |
+| 4. Refusal Threshold | 2 consecutive refusals | **ESCALATE** to human agent |
+| 5. Retry Limit | Already retried payment 2+ times | **BLOCK** — stop retrying |
+| 6. Extension Cap | AI offered >7 days grace period | **MODIFY** — cap to 7 days |
+| 7. Discount Cap | AI offered >15% discount | **MODIFY** — cap to 15% |
+| 8. Budget Check | Campaign incentive budget exhausted | **BLOCK/MODIFY** — zero-discount mode |
 
 ---
 
-## 🚀 Quick Start Guide
+## Benchmark Results
+
+Tested across 200 synthetic cases spanning all failure tiers (low/medium/high value, UPI/EMI/subscription, various failure reasons):
+
+| Metric | Value |
+|---|---|
+| Total Revenue at Risk | ~₹13.9L |
+| Net Recovered | ~₹9.3L |
+| Recovery Rate | ~67% |
+| Autonomous Resolution | ~90% (no human needed) |
+| Human Escalation | ~10% |
+| Unsafe AI Actions Blocked | 30+ (discounts capped, phishing blocked, DNC enforced) |
+| Campaign Budget Tracked | Real-time deduction with auto-cutoff at 5% remaining |
+
+The Policy Sandbox also lets you test adversarial scenarios interactively — try demanding a 50% discount or asking the AI to request an OTP, and watch the Control Plane intercept it.
+
+---
+
+## Razorpay Integration
+
+The project uses **real Razorpay APIs** (test/sandbox mode):
+
+- **Order creation** via the Razorpay Python SDK
+- **Hosted payment links** on `rzp.io` — customers can pay via UPI, card, netbanking
+- **Webhook listener** (`POST /api/webhook/razorpay`) receives `payment.failed` events
+- **ngrok tunneling** for local development with live webhooks
+
+The dashboard separates cases by origin:
+- **Live Razorpay** — real webhook transactions (case IDs starting with `RZP-`)
+- **Synthetic Benchmark** — 200 generated test cases across all failure tiers
+
+---
+
+## Hinglish Voice Calls
+
+The agent communicates in natural Hinglish — the way most Indians actually talk about payments. Each case gets a personalized script generated by the LLM, then converted to audio using `edge-tts` with the `hi-IN-MadhurNeural` voice.
+
+Example:  
+*"Namaste Priya ji, aapka Rs.4,500 ka UPI payment pending hai. Kya aap abhi retry karna chahenge? Main aapko ek payment link bhej deta hoon."*
+
+The dashboard includes an audio player so you can listen to the actual voice call for each case.
+
+---
+
+## Dashboard Features
+
+- **Metrics banner** — revenue at risk, net recovered, recovery rate, control plane interventions
+- **Case explorer** — filterable table with outcome badges, channel tags, live/benchmark origin
+- **Case detail drawer** — full audit timeline, AI reasoning, voice script, audio playback
+- **Policy Sandbox** — type any adversarial prompt and watch the Control Plane respond live
+- **Pipeline Visualizer** — interactive LangGraph node diagram showing execution pathways
+- **Budget gauge** — real-time campaign spending tracker with auto-cutoff
+
+---
+
+## Running the Project
 
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- Groq API Key (Free tier at [console.groq.com](https://console.groq.com))
-- Razorpay Test Key (Free sandbox at [dashboard.razorpay.com](https://dashboard.razorpay.com))
+- Groq API key ([console.groq.com](https://console.groq.com) — free tier works)
+- Razorpay test credentials ([dashboard.razorpay.com](https://dashboard.razorpay.com))
 
----
-
-### Step 1: Clone and Install Dependencies
+### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/Aditya13hack/ai-revenue-recovery-agent.git
 cd ai-revenue-recovery-agent
 
-# Set up Python virtual environment
+# Python
 python -m venv venv
-venv\Scripts\activate        # On Windows (PowerShell/CMD)
-# source venv/bin/activate   # On Linux/macOS
-
-# Install Python requirements
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
 
-# Install Frontend dependencies
-cd frontend
-npm install
-cd ..
+# Frontend
+cd frontend && npm install && cd ..
 ```
 
----
+### Environment Variables
 
-### Step 2: Configure Environment Variables
-
-Create `.env` in the project root:
+Create a `.env` file in the project root:
 ```env
-# LLM Configuration (Groq Free Tier)
-GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_API_KEY=gsk_your_key_here
 LLM_MODEL=groq/compound-mini
 
-# Razorpay Test Credentials
-RAZORPAY_KEY_ID=rzp_test_your_key_id
-RAZORPAY_KEY_SECRET=your_key_secret
+RAZORPAY_KEY_ID=rzp_test_your_key
+RAZORPAY_KEY_SECRET=your_secret
 
-# Policy Limits
 MAX_DISCOUNT_PERCENT=15.0
 MAX_EXTENSION_DAYS=7
 MAX_CONTACT_ATTEMPTS=3
@@ -212,118 +189,120 @@ MAX_PAYMENT_RETRIES=2
 CAMPAIGN_BUDGET=50000.0
 ```
 
----
-
-### Step 3: Run the Synthetic Benchmark (200 Cases)
+### Run the Benchmark (200 Cases)
 
 ```bash
-# 1. Generate the 200-case dataset
 python -m scripts.generate_dataset
-
-# 2. Run the recovery pipeline batch
 python -m scripts.run_batch
 ```
 
----
-
-### Step 4: Start the Applications
+### Start the App
 
 ```bash
-# Terminal 1: Backend Server (FastAPI on Port 8000)
+# Terminal 1 — Backend
 python -m backend.main
 
-# Terminal 2: Frontend Dashboard (Vite on Port 5173)
-cd frontend
-npm run dev
+# Terminal 2 — Frontend
+cd frontend && npm run dev
 ```
 
-Open **`http://localhost:5173`** in your browser.
+Open `http://localhost:5173`.
 
----
-
-### Step 5: (Optional) Test Real Razorpay Webhook In Live Mode
+### Run Live Razorpay Cases
 
 ```bash
-# 1. Start ngrok tunnel in a new terminal
+python -m scripts.seed_live_cases
+```
+
+This calls the real Razorpay API, creates orders, generates `rzp.io` payment links, and processes each case through the full pipeline.
+
+### Webhook Mode (Optional)
+
+```bash
 ngrok http 8000
-
-# 2. In Razorpay Dashboard -> Settings -> Webhooks:
-# Set URL to: https://your-ngrok-url.ngrok-free.app/api/webhook/razorpay
+# Add the ngrok URL as a webhook in Razorpay Dashboard → Settings → Webhooks
 # Event: payment.failed
-
-# 3. Create a test order and trigger a failed payment
-python -m scripts.live_demo --create-order
 ```
 
 ---
 
-## 🧪 Automated Testing Suite
+## Tests
 
-All 8 stopping rules and triage classifiers are verified via automated unit tests:
+27 unit tests covering all 8 stopping rules, budget tracking, triage routing, and thread safety. Tests run against an isolated database — the main `recovery_agent.db` is never touched.
 
 ```bash
 python -m pytest tests/ -v
 ```
 
 ```
-============================= 27 passed in 1.98s ==============================
-tests/test_budget_tracker.py::test_consume_reduces_balance PASSED        [  3%]
-tests/test_budget_tracker.py::test_thread_safety PASSED                  [ 14%]
-tests/test_control_plane.py::test_block_on_do_not_contact PASSED         [ 22%]
-tests/test_control_plane.py::test_block_on_sensitive_data PASSED         [ 25%]
-tests/test_control_plane.py::test_modify_on_discount_exceeding_limit PASSED [ 44%]
-tests/test_stopping_rules.py::test_check_max_extension_days PASSED       [ 74%]
-tests/test_triage.py::test_voice_routing_high_value PASSED               [ 85%]
-... [27/27 Passing]
+tests/test_budget_tracker.py    ....                  [ 14%]
+tests/test_control_plane.py     ..........            [ 51%]
+tests/test_stopping_rules.py    ........              [ 81%]
+tests/test_triage.py            .....                 [100%]
+
+27 passed in 1.10s
 ```
 
 ---
 
-## 📁 Repository Structure
+## Project Structure
 
 ```
-Project404/
 ├── backend/
-│   ├── main.py                     # FastAPI backend & webhook listener
-│   ├── config.py                   # Centralized configuration & thresholds
-│   ├── razorpay_client.py          # Official Razorpay SDK wrapper & retry logic
-│   ├── control_plane/              # CORE DIFFERENTIATOR: Deterministic Policy Engine
-│   │   ├── policy_engine.py        # Decision waterfall (BLOCK/MODIFY/ESCALATE/EXECUTE)
-│   │   ├── stopping_rules.py       # 8 hard stopping rules
-│   │   ├── budget_tracker.py       # Thread-safe merchant budget manager
-│   │   └── rules_config.py         # Merchant policy limits dataclass
-│   ├── orchestrator/               # LangGraph state & node execution
-│   │   ├── graph.py                # Compiled StateGraph workflow
-│   │   └── state.py                # TypedDict state schema
-│   ├── reasoning/                  # LLM agents & Hinglish prompts
-│   │   ├── agent.py                # Groq Compound agent
-│   │   └── schemas.py              # Pydantic data schemas
-│   ├── triage/                     # Channel router & root-cause classifier
-│   ├── database/                   # SQLite models & session management
-│   ├── voice/                      # Dynamic Edge-TTS neural voice synthesis
-│   ├── audit/                      # Cryptographic audit timeline reconstruction
-│   └── metrics/                    # Batch ROI & recovery rate calculator
-├── frontend/                       # Modern React + Vite + Tailwind CSS Dashboard
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── MetricsPanel.tsx    # Hero recovery metrics & ROI banner
-│   │   │   ├── CaseList.tsx        # Filterable case explorer with live badges
-│   │   │   ├── CaseDetail.tsx      # Slide-out case inspector
-│   │   │   ├── VoicePlayer.tsx     # Neural audio player & AI dialogue box
-│   │   │   ├── GraphVisualizer.tsx # Interactive LangGraph topology modal
-│   │   │   ├── PolicySandbox.tsx   # Interactive Guardrail Testing Sandbox
-│   │   │   └── BudgetGauge.tsx     # Live campaign incentive expenditure gauge
+│   ├── main.py                  # FastAPI server + webhook endpoint + sandbox API
+│   ├── config.py                # All policy thresholds in one place
+│   ├── razorpay_client.py       # Razorpay SDK wrapper with retry logic
+│   ├── control_plane/
+│   │   ├── policy_engine.py     # Decision waterfall (BLOCK/MODIFY/ESCALATE/EXECUTE)
+│   │   ├── stopping_rules.py    # The 8 individual rule functions
+│   │   ├── budget_tracker.py    # Thread-safe campaign budget manager
+│   │   └── rules_config.py     # Policy config dataclass
+│   ├── orchestrator/
+│   │   ├── graph.py             # LangGraph StateGraph (7 nodes)
+│   │   └── state.py             # TypedDict state schema
+│   ├── reasoning/
+│   │   ├── agent.py             # Groq LLM agent
+│   │   └── schemas.py           # Pydantic models
+│   ├── triage/                  # Channel routing & root-cause classifier
+│   ├── database/                # SQLite models & session management
+│   ├── voice/                   # Edge-TTS voice synthesis
+│   ├── audit/                   # Timeline event reconstruction
+│   └── metrics/                 # Batch ROI calculator
+├── frontend/
+│   └── src/components/
+│       ├── MetricsPanel.tsx     # Recovery metrics dashboard
+│       ├── CaseList.tsx         # Case explorer with filters
+│       ├── CaseDetail.tsx       # Case detail drawer
+│       ├── VoicePlayer.tsx      # Audio player + transcript
+│       ├── GraphVisualizer.tsx  # LangGraph pipeline visualizer
+│       ├── PolicySandbox.tsx    # Interactive guardrail sandbox
+│       └── BudgetGauge.tsx      # Campaign budget tracker
 ├── scripts/
-│   ├── generate_dataset.py         # 200 synthetic case generator
-│   ├── run_batch.py                # Batch pipeline execution runner
-│   └── live_demo.py                # End-to-end Razorpay API CLI demo
-└── tests/                          # 27 unit & integration tests
+│   ├── generate_dataset.py      # Synthetic case generator
+│   ├── run_batch.py             # Batch pipeline runner
+│   ├── seed_live_cases.py       # Real Razorpay API case creator
+│   └── live_demo.py             # CLI demo script
+└── tests/                       # 27 automated tests
 ```
 
 ---
 
-## 👥 Authors & Acknowledgments
+## Tech Stack
 
-- **Track**: Track 03 — AI Revenue Recovery Agent
-- **Event**: Razorpay AI Buildathon 2026
-- **License**: MIT License
+| Layer | Technology |
+|---|---|
+| Backend | Python, FastAPI, SQLAlchemy, SQLite |
+| LLM | Groq (Compound model), LangChain |
+| Orchestration | LangGraph (StateGraph) |
+| Payments | Razorpay SDK (Orders, Payment Links, Webhooks) |
+| Voice | edge-tts (hi-IN-MadhurNeural) |
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| Testing | pytest (27 tests, isolated DB) |
+
+---
+
+## Author
+
+**Aditya** — Razorpay AI Buildathon 2026, Track 03
+
+License: MIT

@@ -223,16 +223,16 @@ import asyncio
 import edge_tts
 import tempfile
 
-# Cache dir for generated TTS audio
+
+
 TTS_CACHE_DIR = Path(__file__).parent / "voice" / "tts_cache"
 TTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-VOICE_AGENT = "hi-IN-MadhurNeural"      # Male Hindi neural voice
-VOICE_CUSTOMER = "hi-IN-SwaraNeural"     # Female Hindi neural voice
+VOICE_AGENT = "hi-IN-MadhurNeural"
+VOICE_CUSTOMER = "hi-IN-SwaraNeural"
 
 
 def _generate_tts_sync(text: str, voice: str, output_path: Path):
-    """Generate TTS audio synchronously (runs edge-tts async internally)."""
     async def _run():
         communicate = edge_tts.Communicate(text, voice, rate="-5%")
         await communicate.save(str(output_path))
@@ -259,12 +259,14 @@ def get_audio(case_id: str, db: Session = Depends(get_db_dependency)):
     """
     audio_dir = AUDIO_OUTPUT_DIR
 
-    # 1. Check TTS cache first (already generated for this case)
+
+
     cached_file = TTS_CACHE_DIR / f"{case_id}.mp3"
     if cached_file.exists():
         return FileResponse(str(cached_file), media_type="audio/mpeg")
 
-    # 2. Look up the AI-generated message from action_proposals
+
+
     proposal = (
         db.query(ActionProposalModel)
         .filter(ActionProposalModel.case_id == case_id)
@@ -281,7 +283,8 @@ def get_audio(case_id: str, db: Session = Depends(get_db_dependency)):
             # If TTS fails, fall through to demo files
             pass
 
-    # 3. Fallback: static demo files based on case outcome
+
+
     case = db.query(Case).filter(Case.id == case_id).first()
     scenario = "DEMO-HAPPY_PATH.mp3"
 
@@ -377,7 +380,6 @@ import json
 
 @app.get("/api/razorpay/status")
 def razorpay_status():
-    """Check if Razorpay API keys are valid and connected."""
     return verify_connection()
 
 
@@ -387,18 +389,20 @@ def razorpay_create_order(
     customer_name: str = Query("Test Customer", description="Customer name"),
     customer_phone: str = Query("+919999999999", description="Customer phone"),
 ):
-    """Create a real Razorpay order + payment link in test mode (proves API works)."""
+    """Create a Razorpay order + payment link in test mode."""
     try:
         receipt = f"LIVE-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
-        # 1. Create Order
+
+
         order = create_test_order(
             amount_inr=amount,
             receipt=receipt,
             notes={"source": "ai_recovery_agent", "customer": customer_name},
         )
 
-        # 2. Create Payment Link
+
+
         link = create_payment_link(
             amount_inr=amount,
             customer_name=customer_name,
@@ -446,7 +450,8 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     if event_type != "payment.failed":
         return {"status": "ignored", "event": event_type}
 
-    # Extract payment details from Razorpay webhook
+
+
     payment_id = entity.get("id", "")
     amount_paise = entity.get("amount", 0)
     amount_inr = amount_paise / 100
@@ -458,7 +463,8 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     notes = entity.get("notes", {})
     order_id = entity.get("order_id", "")
 
-    # Map Razorpay error to our failure reasons
+
+
     failure_map = {
         "BAD_REQUEST_ERROR": "insufficient_balance",
         "GATEWAY_ERROR": "bank_timeout",
@@ -466,7 +472,8 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     }
     failure_reason = failure_map.get(error_code, "unknown")
 
-    # Map payment method to our payment types
+
+
     method_map = {
         "upi": "upi_autopay",
         "emandate": "upi_autopay",
@@ -477,7 +484,6 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     }
     payment_type = method_map.get(method, "upi_autopay")
 
-    # Determine value tier
     if amount_inr >= 10000:
         value_tier = "high"
     elif amount_inr >= 3000:
@@ -485,16 +491,13 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     else:
         value_tier = "low"
 
-    # Create case ID from Razorpay payment ID
     case_id = f"RZP-{payment_id[-8:].upper()}" if payment_id else f"RZP-{datetime.now().strftime('%H%M%S')}"
     customer_name = notes.get("customer", email.split("@")[0] if email else "Razorpay Customer")
 
-    # Check if case already exists
     existing = db.query(Case).filter(Case.id == case_id).first()
     if existing:
         return {"status": "duplicate", "case_id": case_id}
 
-    # Create real case in database
     new_case = Case(
         id=case_id,
         customer_name=customer_name,
@@ -518,7 +521,6 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db_depend
     db.add(new_case)
     db.commit()
 
-    # Process through AI + Control Plane pipeline
     config = MerchantPolicyConfig.from_config()
     budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
 
@@ -547,10 +549,7 @@ def simulate_webhook(
     payment_type: str = Query("upi_autopay", description="Payment type"),
     db: Session = Depends(get_db_dependency),
 ):
-    """
-    Simulate a Razorpay payment.failed webhook locally (no ngrok needed).
-    Creates a real case and processes it through the full pipeline.
-    """
+    """Simulate a Razorpay payment.failed webhook."""
     case_id = f"LIVE-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
     if amount >= 10000:
@@ -641,10 +640,7 @@ class SandboxEvalRequest(PyBaseModel):
 
 @app.post("/api/sandbox/evaluate")
 def evaluate_sandbox_prompt(req: SandboxEvalRequest):
-    """
-    Live Policy Sandbox & Guardrail Simulator:
-    Runs any custom scenario or customer prompt through Groq LLM + Control Plane Waterfall in real-time.
-    """
+    """Simulate a customer prompt through the LLM and control plane."""
     from backend.reasoning.schemas import (
         CaseContext, PaymentType, FailureReason, ValueTier, RiskProfile, ConversationTurn, ActionProposal, ActionType
     )
@@ -653,7 +649,6 @@ def evaluate_sandbox_prompt(req: SandboxEvalRequest):
     from backend.control_plane.rules_config import MerchantPolicyConfig
     from backend.control_plane.budget_tracker import BudgetTracker
 
-    # 1. Build CaseContext & Case Object
     context = CaseContext(
         case_id="SANDBOX-DEMO",
         customer_name="Demo Customer",
@@ -682,15 +677,12 @@ def evaluate_sandbox_prompt(req: SandboxEvalRequest):
         do_not_contact=context.do_not_contact,
     )
 
-    # 2. Call LLM Reasoning Layer / Intent Analysis
     import re
     msg_lower = req.customer_message.lower()
     
-    # Extract any explicit percentage requested (e.g. 40% or 30 percent)
     pct_match = re.search(r'(\d+)\s*(?:%|percent)', msg_lower)
     requested_pct = float(pct_match.group(1)) if pct_match else None
     
-    # Extract any explicit days requested (e.g. 20 days or 15 din)
     days_match = re.search(r'(\d+)\s*(?:day|days|din)', msg_lower)
     requested_days = int(days_match.group(1)) if days_match else None
 
@@ -699,23 +691,20 @@ def evaluate_sandbox_prompt(req: SandboxEvalRequest):
         history = [ConversationTurn(speaker="customer", text=req.customer_message)]
         proposal = agent.propose_action(context, history)
         
-        # If customer explicitly demanded a high discount (e.g. 40%) and LLM proposed request_retry or high discount,
-        # ensure proposal reflects the attempted discount offer so the Control Plane can demonstrate its bounding rule
         is_sensitive = any(w in msg_lower for w in ["otp", "cvv", "pin", "password", "card number"])
         if is_sensitive:
             proposal.message_content = "Kripya transaction verify karne ke liye apna OTP aur CVV share karein."
-            proposal.reasoning = "AI attempted to request credentials for transaction verification."
+            proposal.reasoning = "Attempted to request credentials for verification."
         elif requested_pct and requested_pct > 15.0 and proposal.action_type != ActionType.OFFER_DISCOUNT:
             proposal.action_type = ActionType.OFFER_DISCOUNT
-            proposal.discount_pct = min(requested_pct, 25.0)  # AI attempts to offer 25%
-            proposal.reasoning = f"Customer demanded {requested_pct:.0f}% discount. AI attempted to offer {proposal.discount_pct:.0f}% discount to prevent churn."
+            proposal.discount_pct = min(requested_pct, 25.0)
+            proposal.reasoning = f"Customer requested {requested_pct:.0f}% discount. Offered {proposal.discount_pct:.0f}% discount."
         elif requested_days and requested_days > 7 and proposal.action_type != ActionType.OFFER_EXTENSION:
             proposal.action_type = ActionType.OFFER_EXTENSION
             proposal.extension_days = requested_days
-            proposal.reasoning = f"Customer requested {requested_days} days grace period. AI attempted to offer extension."
+            proposal.reasoning = f"Customer requested {requested_days} days grace period. Offered extension."
 
     except Exception as e:
-        # Fallback simulation proposal
         is_sensitive = any(w in msg_lower for w in ["otp", "cvv", "pin", "password", "card number"])
         is_discount = "discount" in msg_lower or "%" in msg_lower or requested_pct is not None
         is_extension = "extension" in msg_lower or "din" in msg_lower or "day" in msg_lower or requested_days is not None
@@ -723,20 +712,20 @@ def evaluate_sandbox_prompt(req: SandboxEvalRequest):
         if is_sensitive:
             proposal = ActionProposal(
                 action_type=ActionType.REQUEST_RETRY,
-                reasoning="AI attempted to request OTP/CVV verification credentials.",
+                reasoning="Attempted to request OTP/CVV verification credentials.",
                 message_content="Kripya apna OTP aur CVV share karein.",
             )
         elif is_discount:
             proposal = ActionProposal(
                 action_type=ActionType.OFFER_DISCOUNT,
                 discount_pct=requested_pct or 25.0,
-                reasoning=f"AI attempted to offer {requested_pct or 25.0}% discount in response to customer demand.",
+                reasoning=f"Offered {requested_pct or 25.0}% discount in response to customer demand.",
             )
         elif is_extension:
             proposal = ActionProposal(
                 action_type=ActionType.OFFER_EXTENSION,
                 extension_days=requested_days or 15,
-                reasoning=f"AI attempted to grant {requested_days or 15} days extension in response to customer request.",
+                reasoning=f"Granted {requested_days or 15} days extension in response to customer request.",
             )
         else:
             proposal = ActionProposal(
@@ -744,7 +733,6 @@ def evaluate_sandbox_prompt(req: SandboxEvalRequest):
                 reasoning=f"Standard payment retry proposal for: {req.customer_message}",
             )
 
-    # 3. Call Deterministic Control Plane
     config = MerchantPolicyConfig.from_config()
     budget_tracker = BudgetTracker(CAMPAIGN_BUDGET)
     decision = validate_action(proposal, case, config, budget_tracker)

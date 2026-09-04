@@ -16,7 +16,6 @@ from backend.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
 
 
 def get_client() -> razorpay.Client:
-    """Get an authenticated Razorpay client."""
     if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
         raise ValueError("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set in .env")
     return razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
@@ -95,13 +94,11 @@ def create_payment_link(
 
 
 def fetch_payment(payment_id: str) -> dict:
-    """Fetch a specific payment by ID."""
     client = get_client()
     return client.payment.fetch(payment_id)
 
 
 def fetch_order(order_id: str) -> dict:
-    """Fetch a specific order by ID."""
     client = get_client()
     return client.order.fetch(order_id)
 

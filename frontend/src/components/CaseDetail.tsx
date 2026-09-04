@@ -35,7 +35,7 @@ export default function CaseDetail({ id, onClose }: CaseDetailProps) {
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative bg-white text-slate-800">
-      {/* Close Button */}
+
       <button 
         onClick={onClose}
         className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 z-10 p-1.5 rounded-xl hover:bg-slate-100 transition"
@@ -45,7 +45,7 @@ export default function CaseDetail({ id, onClose }: CaseDetailProps) {
         </svg>
       </button>
 
-      {/* Header & Metadata Cards */}
+
       <div className="p-6 border-b border-slate-200/80 bg-gradient-to-b from-slate-50/80 to-white shrink-0">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
@@ -81,7 +81,7 @@ export default function CaseDetail({ id, onClose }: CaseDetailProps) {
         </div>
       </div>
 
-      {/* Main Drawer Scroll Area */}
+
       <div className="flex-1 overflow-y-auto p-5 bg-slate-50/60 space-y-4">
         {caseData.assigned_channel === 'voice' && <VoicePlayer caseId={id} />}
         

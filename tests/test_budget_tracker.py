@@ -7,6 +7,10 @@ from backend.database.models import CampaignBudget, BudgetTransaction
 @pytest.fixture(autouse=True)
 def setup_teardown_db():
     init_db()
+    with get_db() as db:
+        db.query(BudgetTransaction).delete()
+        db.query(CampaignBudget).delete()
+        db.commit()
     yield
 
 def test_consume_reduces_balance():

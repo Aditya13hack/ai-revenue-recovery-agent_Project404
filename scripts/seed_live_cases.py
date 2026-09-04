@@ -1,6 +1,5 @@
 """
-Seed real Razorpay API cases into the database.
-Creates authentic Razorpay Orders & Payment links via the Razorpay test API.
+Seed Razorpay API test cases into the database.
 """
 
 import sys
@@ -67,7 +66,6 @@ def seed_real_razorpay_cases():
         case_id = f"RZP-{receipt[-8:]}"
 
         with get_db() as session:
-            # Check if case exists
             existing = session.query(Case).filter(Case.id == case_id).first()
             if not existing:
                 new_case = Case(

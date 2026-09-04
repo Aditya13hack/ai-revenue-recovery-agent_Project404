@@ -1,10 +1,5 @@
 """
-LangGraph StateGraph orchestrating the full recovery loop:
-  Detect → Diagnose → Triage → Reason → Validate → Execute → Measure
-
-Each node is a pure function that takes the current state and returns
-the updated state. Conditional edges handle branching based on triage
-channel and control plane decisions.
+LangGraph StateGraph: Detect → Diagnose → Triage → Reason → Validate → Execute → Measure
 """
 
 from datetime import datetime
@@ -27,7 +22,6 @@ from backend.reasoning.agent import ReasoningAgent
 
 
 def detect_node(state: RecoveryState) -> RecoveryState:
-    """Load case from DB, build CaseContext, log detection."""
     session = state.get("_session")
     case_id = state["case_id"]
     logger: AuditLogger | None = state.get("_logger")
@@ -58,7 +52,6 @@ def detect_node(state: RecoveryState) -> RecoveryState:
 
 
 def diagnose_node(state: RecoveryState) -> RecoveryState:
-    """Analyze failure reason, classify customer risk."""
     logger: AuditLogger | None = state.get("_logger")
     ctx = state["case_context"]
 
@@ -78,7 +71,6 @@ def diagnose_node(state: RecoveryState) -> RecoveryState:
 
 
 def triage_node(state: RecoveryState) -> RecoveryState:
-    """Run channel classifier, assign channel, log triage decision."""
     session = state.get("_session")
     logger: AuditLogger | None = state.get("_logger")
 
@@ -87,7 +79,8 @@ def triage_node(state: RecoveryState) -> RecoveryState:
 
     state["triage_result"] = result
 
-    # Persist the channel assignment
+
+
     case.assigned_channel = result.assigned_channel.value
     case.contact_attempts += 1
 
@@ -97,7 +90,6 @@ def triage_node(state: RecoveryState) -> RecoveryState:
 
 
 def reason_node(state: RecoveryState) -> RecoveryState:
-    """Call LLM agent to propose an action."""
     logger: AuditLogger | None = state.get("_logger")
     agent: ReasoningAgent = state.get("_agent")
 
@@ -123,7 +115,6 @@ def reason_node(state: RecoveryState) -> RecoveryState:
 
 
 def validate_node(state: RecoveryState) -> RecoveryState:
-    """Pass proposal through the deterministic control plane."""
     session = state.get("_session")
     logger: AuditLogger | None = state.get("_logger")
     budget_tracker: BudgetTracker = state.get("_budget_tracker")
@@ -146,7 +137,8 @@ def validate_node(state: RecoveryState) -> RecoveryState:
         }
     ]
 
-    # Persist proposal and decision to database for analytics & API
+
+
     prop = state["current_proposal"]
     mod_prop = decision.modified_proposal
     proposal_record = ActionProposalModel(
@@ -174,7 +166,6 @@ def validate_node(state: RecoveryState) -> RecoveryState:
 
 
 def execute_node(state: RecoveryState) -> RecoveryState:
-    """Carry out the approved / modified action, update the case in DB."""
     session = state.get("_session")
     logger: AuditLogger | None = state.get("_logger")
     budget_tracker: BudgetTracker = state.get("_budget_tracker")
@@ -200,7 +191,8 @@ def execute_node(state: RecoveryState) -> RecoveryState:
         action_details["discount_pct"] = discount_pct
         action_details["discount_amount"] = discount_amount
 
-        # Consume budget
+
+
         if budget_tracker and discount_amount > 0:
             budget_tracker.consume(
                 discount_amount, state["case_id"],
@@ -236,13 +228,13 @@ def execute_node(state: RecoveryState) -> RecoveryState:
 
 
 def measure_node(state: RecoveryState) -> RecoveryState:
-    """Record final outcome, update case status, log measurement."""
     session = state.get("_session")
     logger: AuditLogger | None = state.get("_logger")
 
     case = session.query(Case).filter(Case.id == state["case_id"]).first()
 
-    # Determine final outcome
+
+
     triage = state.get("triage_result")
     decision = state.get("control_plane_decision")
 
@@ -270,7 +262,8 @@ def measure_node(state: RecoveryState) -> RecoveryState:
 
     state["final_outcome"] = outcome
 
-    # Update case in DB
+
+
     case.outcome = outcome
     case.amount_recovered = amount
     case.resolved_at = datetime.utcnow()

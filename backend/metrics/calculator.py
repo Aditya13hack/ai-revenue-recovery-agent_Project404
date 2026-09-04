@@ -10,11 +10,8 @@ from backend.reasoning.schemas import BatchMetrics
 
 def compute_batch_metrics(session: Session, data_mode: str = "all") -> BatchMetrics:
     """
-    Compute honest, unpadded metrics.
-    data_mode options:
-      - 'all': all cases
-      - 'synthetic': benchmark dataset cases (CASE-*)
-      - 'live': real Razorpay webhook cases (RZP-*, LIVE-*)
+    Compute aggregate metrics for the batch.
+    data_mode: 'all' | 'synthetic' (CASE-*) | 'live' (RZP-*, LIVE-*)
     """
     all_cases = session.query(Case).all()
 

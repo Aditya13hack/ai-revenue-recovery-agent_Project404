@@ -1,10 +1,5 @@
 """
-Pydantic schemas for structured communication between components.
-These schemas enforce type safety at every boundary:
-  LLM → Control Plane → Execution → Audit
-
-Every component imports from here — this is the single source of truth
-for data shapes flowing through the system.
+Pydantic schemas for data flowing between components.
 """
 
 from pydantic import BaseModel, Field
