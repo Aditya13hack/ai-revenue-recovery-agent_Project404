@@ -303,6 +303,4 @@ tests/test_triage.py            .....                 [100%]
 
 ## Author
 
-**Aditya** — Razorpay AI Buildathon 2026, Track 03
-
-License: MIT
+**Aditya** — Razorpay AI Buildathon 2026,
