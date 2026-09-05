@@ -22,7 +22,7 @@ from backend.metrics.calculator import compute_batch_metrics
 # ─────────────────── APP SETUP ───────────────────
 
 app = FastAPI(
-    title="AI Revenue Recovery Agent",
+    title="RevGuard — AI Revenue Recovery Agent",
     description="Razorpay AI Buildathon 2026 — Track 03",
     version="1.0.0",
 )
@@ -45,7 +45,7 @@ def startup():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "healthy", "service": "AI Revenue Recovery Agent"}
+    return {"status": "healthy", "service": "RevGuard"}
 
 
 # ─────────────────── METRICS ───────────────────

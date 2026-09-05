@@ -1,1 +1,1 @@
-# AI Revenue Recovery Agent — Backend Package
+# RevGuard — Backend Package

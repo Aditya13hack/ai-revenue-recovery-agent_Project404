@@ -23,7 +23,7 @@ from backend.config import CAMPAIGN_BUDGET
 
 
 def run_batch(limit=None):
-    print("\n[START] AI Revenue Recovery Agent - Batch Run", flush=True)
+    print("\n[START] RevGuard - Batch Run", flush=True)
     print("=" * 60, flush=True)
 
     config = MerchantPolicyConfig.from_config()

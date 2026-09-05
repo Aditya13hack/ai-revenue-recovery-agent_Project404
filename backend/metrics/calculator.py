@@ -115,7 +115,7 @@ def compute_batch_metrics(session: Session, data_mode: str = "all") -> BatchMetr
 def print_metrics(metrics: BatchMetrics) -> None:
     """Pretty-print batch metrics to the console."""
     print("\n" + "=" * 60)
-    print("   AI REVENUE RECOVERY AGENT - BATCH METRICS")
+    print("   REVGUARD - BATCH METRICS")
     print("=" * 60)
     print(f"  Total Cases Processed:        {metrics.total_cases}")
     print(f"  Total Revenue at Risk:        Rs.{metrics.total_revenue_at_risk:,.2f}")

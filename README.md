@@ -1,10 +1,10 @@
-# AI Revenue Recovery Agent
+# RevGuard — AI Revenue Recovery Agent
 
-**Razorpay AI Buildathon 2026 — Track 03**
+**Razorpay AI Buildathon 2026 — Track 03 (AI Revenue Recovery)**
 
 > AI proposes. Control Plane decides. System executes.
 
-An autonomous agent that recovers failed recurring payments (UPI Autopay, EMIs, Subscriptions) using LLM reasoning, real Razorpay APIs, and Hinglish voice calls — while keeping the AI strictly bounded by a deterministic policy engine.
+RevGuard is an autonomous dunning and revenue recovery system that recovers failed recurring payments (UPI Autopay, EMIs, Subscriptions) using LLM reasoning, real Razorpay APIs, and Hinglish voice calls — while keeping the AI strictly bounded by a deterministic policy engine.
 
 ---
 

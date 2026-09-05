@@ -26,16 +26,11 @@ function App() {
               </svg>
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-base font-bold tracking-tight text-slate-900">
-                  AI Revenue Recovery Agent
-                </h1>
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                  Track 03
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium">
-                Deterministic Policy Engine & Autonomous Dunning Pipeline
+              <h1 className="text-base font-bold tracking-tight text-slate-900">
+                RevGuard
+              </h1>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Autonomous Dunning & Revenue Recovery Pipeline
               </p>
             </div>
           </div>

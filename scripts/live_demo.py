@@ -36,7 +36,7 @@ from backend.config import CAMPAIGN_BUDGET, RAZORPAY_KEY_ID
 def print_header():
     print("\n" + "=" * 65)
     print("   RAZORPAY LIVE MODE DEMO")
-    print("   AI Revenue Recovery Agent x Razorpay Test API")
+    print("   RevGuard x Razorpay Test API")
     print("=" * 65)
 
 
